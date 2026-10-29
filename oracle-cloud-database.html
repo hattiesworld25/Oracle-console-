@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Database — Autonomous</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+    --red: #c74634;
+    --red-d: #a33a2b;
+    --ink: #161513;
+    --muted: #6b6560;
+    --line: #e6e2dc;
+    --bg: #f6f5f3;
+    --card: #fff;
+    --ok: #1b7a4a;
+    --ok-bg: #e7f6ee;
+    --warn: #9a6700;
+    --warn-bg: #fff6e0;
+    --stop: #8a3a32;
+    --stop-bg: #fdecea;
+    --blue: #1f4e8c;
+    --shadow: 0 1px 2px rgba(22,21,19,.06), 0 8px 24px rgba(22,21,19,.04);
+    --radius: 10px;
+}
+  * {box-sizing: border-box;}
+  html, body {margin: 0; height: 100%;}
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    display: grid;
+    grid-template-rows: 56px 1fr;
+    grid-template-columns: 228px 1fr;
+    grid-template-areas: "top top" "side main";
+}
+  header {
+    grid-area: top;
+    background: #1c1917;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 16px;
+    z-index: 5;
+}
+.brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; letter-spacing: -.02em;
+}
+.mark {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: linear-gradient(145deg, #e25b48, #c74634);
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 800;
+}
+.crumb {color: #c8c2bb; font-size: 13px;}
+.crumb b {color: #fff; font-weight: 600;}
+.hdr-sp {flex: 1;}
+.region,.avatar {
+    background: #2c2826; border: 1px solid #3d3835;
+    color: #eee; border-radius: 8px; padding: 6px 10px; font-size: 12px;
+}
+.avatar {width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;}
+  aside {
+    grid-area: side;
+    background: #fff;
+    border-right: 1px solid var(--line);
+    padding: 14px 10px;
+}
+.nav-label {font-size: 11px; letter-spacing:.08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px 6px;}
+.nav-btn {
+    width: 100%; text-align: left; border: 0; background: transparent;
+    padding: 9px 10px; border-radius: 8px; font: inherit; font-size: 14px;
+    color: #3a3633; cursor: pointer; display: flex; gap: 8px; align-items: center;
+}
+.nav-btn.active,.nav-btn:hover {background: #f4efe9; color: var(--ink);}
+.nav-btn.active {font-weight: 600; box-shadow: inset 3px 0 0 var(--red);}
+  main {grid-area: main; overflow: auto; padding: 22px 28px 48px;}
+  h1 {font-size: 22px; margin: 0 0 4px; letter-spacing: -.03em;}
+.sub {color: var(--muted); font-size: 13.5px; margin: 0 0 18px;}
+.row {display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
+.sp {flex: 1;}
+  button, select, input, textarea {font: inherit;}
+.btn {
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 13.5px;
+}
+.btn:hover {background: #faf8f6;}
+.btn.primary {background: var(--red); border-color: var(--red-d); color: #fff;}
+.btn.primary:hover {background: var(--red-d);}
+.btn.ghost {background: transparent;}
+.btn.danger {color: var(--stop); border-color: #f0c9c4;}
+.btn:disabled {opacity:.45; cursor: not-allowed;}
+.search {
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 240px; background: #fff;
+}
+.cards {display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;}
+.stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: var(--shadow);
+}
+.stat.k {font-size: 12px; color: var(--muted);}
+.stat.v {font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -.03em;}
+.panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+}
+  table {width: 100%; border-collapse: collapse; font-size: 13.5px;}
+  th {text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 14px; background: #faf9f7; border-bottom: 1px solid var(--line);}
+  td {padding: 12px 14px; border-bottom: 1px solid #f0ece7; vertical-align: middle;}
+  tr.click:hover td {background: #fbf8f5; cursor: pointer;}
+.pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
+}
+.pill.ok {background: var(--ok-bg); color: var(--ok);}
+.pill.warn {background: var(--warn-bg); color: var(--warn);}
+.pill.stop {background: var(--stop-bg); color: var(--stop);}
+.dot {width: 7px; height: 7px; border-radius: 50%; background: currentColor;}
+.linkish {color: var(--blue); font-weight: 600; cursor: pointer;}
+.tabs {display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 8px 0 16px;}
+.tab {
+    border: 0; background: transparent; padding: 10px 12px; cursor: pointer;
+    font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent;
+}
+.tab.on {color: var(--ink); border-bottom-color: var(--red);}
+.grid2 {display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px;}
+.kv {display: grid; grid-template-columns: 160px 1fr; gap: 8px 12px; font-size: 13.5px; padding: 4px 0;}
+.kv span {color: var(--muted);}
+.mono {font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px;}
+.chart {
+    height: 160px; display: flex; align-items: flex-end; gap: 6px; padding: 8px 4px 0;
+}
+.bar {
+    flex: 1; background: linear-gradient(180deg, #e36a58, #c74634); border-radius: 5px 5px 2px 2px; min-height: 4px;
+    position: relative;
+}
+.bar span {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--muted); white-space: nowrap;
+}
+.modal-bg {
+    position: fixed; inset: 0; background: rgba(22,21,19,.45);
+    display: none; place-items: center; z-index: 20; padding: 20px;
+}
+.modal-bg.show {display: grid;}
+.modal {
+    width: min(640px, 100%); background: #fff; border-radius: 14px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.25); overflow: hidden;
+}
+.modal h2 {margin: 0; font-size: 18px;}
+.modal-h,.modal-f {padding: 16px 18px; display: flex; align-items: center; gap: 10px;}
+.modal-h {border-bottom: 1px solid var(--line);}
+.modal-f {border-top: 1px solid var(--line); justify-content: flex-end; background: #faf9f7;}
+.modal-b {padding: 16px 18px; display: grid; gap: 12px;}
+  label {font-size: 12.5px; font-weight: 600; display: grid; gap: 6px;}
+  input[type="text"], input[type="password"], input[type="number"], select, textarea {
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; background: #fff; width: 100%;
+}
+  textarea {min-height: 140px; resize: vertical;}
+.two {display: grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+.toast {
+    position: fixed; bottom: 18px; right: 18px; background: #1c1917; color: #fff;
+    padding: 12px 14px; border-radius: 10px; font-size: 13.5px; display: none; z-index: 30;
+    box-shadow: var(--shadow); max-width: 360px;
+}
+.toast.show {display: block;}
+.sql-out {
+    background: #1c1917; color: #efeae4; border-radius: 10px; padding: 12px; min-height: 120px;
+    overflow: auto; white-space: pre-wrap;
+}
+.empty {padding: 28px; text-align: center; color: var(--muted);}
+.badge {font-size: 11px; background: #f4efe9; border-radius: 6px; padding: 2px 6px; font-weight: 600;}
+  @media (max-width: 980px) {
+    body {grid-template-columns: 1fr; grid-template-areas: "top" "main";}
+    aside {display: none;}
+.cards,.grid2,.two {grid-template-columns: 1fr;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">DB</div> Cloud Database</div>
+  <div class="crumb">Console / <b>Autonomous Database</b></div>
+  <div class="hdr-sp"></div>
+  <div class="region" id="regionLabel">us-ashburn-1</div>
+  <div class="avatar">AL</div>
+</header>
+<aside>
+  <div class="nav-label">Database</div>
+  <button class="nav-btn active" data-view="list">Autonomous Databases</button>
+  <button class="nav-btn" data-view="backups">Backups</button>
+  <button class="nav-btn" data-view="sql">SQL Worksheet</button>
+  <div class="nav-label">Account</div>
+  <button class="nav-btn" data-view="usage">Usage & billing</button>
+</aside>
+<main id="app"></main>
+<div class="modal-bg" id="modal"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1", "ap-tokyo-1"];
+const state = {
+  view: "list",
+  region: "us-ashburn-1",
+  q: "",
+  selected: null,
+  tab: "overview",
+  sqlDb: null,
+  sqlText: "SELECT table_name, num_rows\nFROM user_tables\nORDER BY num_rows DESC NULLS LAST;",
+  sqlResult: "",
+  dbs: [
+    db("sales-adb", "Transaction Processing", "Available", 2, 1, "AL32UTF8", true),
+    db("analytics-dw", "Data Warehouse", "Available", 8, 0, "AL32UTF8", true),
+    db("hr-dev", "Transaction Processing", "Stopped", 1, 1, "AL32UTF8", false),
+    db("payments-prod", "Transaction Processing", "Available", 4, 1, "AL32UTF8", true)
+],
+  backups: []
+};
+
+function db(name, workload, status, ocpu, storage, charset, auto) {
+  const id = "ocid1.autonomousdatabase.oc1.." + Math.random().toString(36).slice(2, 14);
+  const created = new Date(Date.now() - Math.floor(Math.random()*40)*86400000);
+  return {
+    id, name, display: name, workload, status, ocpu, storageTB: storage || 1,
+    charset, autoScaling: auto, region: state.region || "us-ashburn-1",
+    compartment: "prod-apps", created: created.toISOString(),
+    admin: "ADMIN", version: "19c", license: "License included",
+    cpuPct: status === "Available"? 12 + Math.floor(Math.random()*40): 0,
+    sessions: status === "Available"? 8 + Math.floor(Math.random()*40): 0,
+    storageUsed: +(0.12 + Math.random()*0.4).toFixed(2),
+    series: Array.from({length: 12}, () => 8 + Math.floor(Math.random()*70)),
+    wallet: false
+};
+}
+
+state.dbs.forEach(seedBackups);
+state.sqlDb = state.dbs[0].id;
+
+function seedBackups(d) {
+  for (let i = 1; i <= 3; i++) {
+    const t = new Date(Date.now() - i * 86400000);
+    state.backups.push({
+      id: "bkp-" + d.name + "-" + i,
+      dbId: d.id,
+      db: d.display,
+      type: i === 1? "Automatic": "Automatic",
+      when: t.toISOString(),
+      size: (1.2 + Math.random()).toFixed(2) + " GB",
+      status: "Completed",
+      region: d.region
+});
+}
+}
+
+function $(sel, root=document) {return root.querySelector(sel);}
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2400);
+}
+function fmt(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit"});
+}
+function pill(status) {
+  const cls = status === "Available"? "ok": status === "Stopped"? "stop": "warn";
+  return `<span class="pill ${cls}"><span class="dot"></span>${status}</span>`;
+}
+function find(id) {return state.dbs.find(d => d.id === id);}
+
+function render() {
+  $("#regionLabel").textContent = state.region;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === (state.view === "detail"? "list": state.view)));
+  const app = $("#app");
+  if (state.view === "list") app.innerHTML = viewList();
+  else if (state.view === "detail") app.innerHTML = viewDetail();
+  else if (state.view === "backups") app.innerHTML = viewBackups();
+  else if (state.view === "sql") app.innerHTML = viewSql();
+  else if (state.view === "usage") app.innerHTML = viewUsage();
+  bind();
+}
+
+function viewList() {
+  const list = state.dbs.filter(d => d.region === state.region && (d.display + d.workload).toLowerCase().includes(state.q.toLowerCase()));
+  const avail = state.dbs.filter(d => d.region === state.region && d.status === "Available").length;
+  const ocpu = state.dbs.filter(d => d.region === state.region && d.status === "Available").reduce((a,d) => a + d.ocpu, 0);
+  const tb = state.dbs.filter(d => d.region === state.region).reduce((a,d) => a + d.storageTB, 0);
+  return `
+    <h1>Autonomous Databases</h1>
+    <p class="sub">Fully managed Oracle-style cloud databases in <b>${state.region}</b>. This console is a local simulator — no cloud account is contacted.</p>
+    <div class="cards">
+      <div class="stat"><div class="k">Databases</div><div class="v">${list.length}</div></div>
+      <div class="stat"><div class="k">Available</div><div class="v">${avail}</div></div>
+      <div class="stat"><div class="k">OCPUs running</div><div class="v">${ocpu}</div></div>
+      <div class="stat"><div class="k">Provisioned storage</div><div class="v">${tb} TB</div></div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <input class="search" id="q" placeholder="Filter by name or workload" value="${esc(state.q)}" />
+      <select id="region" class="btn">${REGIONS.map(r => `<option ${r===state.region?"selected":""}>${r}</option>`).join("")}</select>
+      <div class="sp"></div>
+      <button class="btn primary" id="create">Create Autonomous Database</button>
+    </div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Name</th><th>State</th><th>Workload</th><th>OCPU</th><th>Storage</th><th>Compartment</th><th></th></tr></thead>
+        <tbody>
+          ${list.length? list.map(d => `
+            <tr class="click" data-open="${d.id}">
+              <td><div class="linkish">${esc(d.display)}</div><div class="mono" style="color:#8a847e">${d.id.slice(0,28)}…</div></td>
+              <td>${pill(d.status)}</td>
+              <td>${d.workload}</td>
+              <td>${d.ocpu}${d.autoScaling? ' <span class="badge">auto</span>': ""}</td>
+              <td>${d.storageTB} TB</td>
+              <td>${d.compartment}</td>
+              <td><button class="btn" data-open="${d.id}">Manage</button></td>
+            </tr>`).join(""): `<tr><td colspan="7" class="empty">No databases in this region. Create one to get started.</td></tr>`}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function viewDetail() {
+  const d = find(state.selected);
+  if (!d) {state.view = "list"; return viewList();}
+  const tabs = ["overview","connection","metrics","backups","scale"].map(t =>
+    `<button class="tab ${state.tab===t?"on":""}" data-tab="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join("");
+  return `
+    <div class="row">
+      <button class="btn" id="back">← Databases</button>
+      <div>
+        <h1 style="margin:0">${esc(d.display)}</h1>
+        <p class="sub" style="margin:2px 0 0">${d.workload} · ${d.region}</p>
+      </div>
+      <div class="sp"></div>
+      ${pill(d.status)}
+      ${d.status === "Available"
+? `<button class="btn" id="stop">Stop</button>`
+: d.status === "Stopped"
+? `<button class="btn primary" id="start">Start</button>`
+: `<button class="btn" disabled>Working…</button>`}
+      <button class="btn danger" id="terminate">Terminate</button>
+    </div>
+    <div class="tabs">${tabs}</div>
+    ${detailBody(d)}`;
+}
+
+function detailBody(d) {
+  if (state.tab === "overview") {
+    return `<div class="grid2">
+      <div class="panel" style="padding:16px">
+        <div class="kv">
+          <span>OCID</span><div class="mono">${d.id} <button class="btn" data-copy="${d.id}">Copy</button></div>
+          <span>State</span><div>${d.status}</div>
+          <span>Workload</span><div>${d.workload}</div>
+          <span>Database version</span><div>${d.version}</div>
+          <span>Character set</span><div>${d.charset}</div>
+          <span>License</span><div>${d.license}</div>
+          <span>ECPU / OCPU</span><div>${d.ocpu}</div>
+          <span>Storage</span><div>${d.storageTB} TB allocated · ${d.storageUsed} TB used</div>
+          <span>Auto scaling</span><div>${d.autoScaling? "Enabled": "Disabled"}</div>
+          <span>Compartment</span><div>${d.compartment}</div>
+          <span>Created</span><div>${fmt(d.created)}</div>
+        </div>
+      </div>
+      <div class="panel" style="padding:16px">
+        <div class="k" style="color:var(--muted);font-size:12px">CPU utilization (simulated)</div>
+        <div style="font-size:28px;font-weight:700;margin:6px 0">${d.cpuPct}%</div>
+        <div style="height:8px;background:#f0ece7;border-radius:99px;overflow:hidden"><div style="width:${d.cpuPct}%;height:100%;background:var(--red)"></div></div>
+        <p class="sub">Sessions: ${d.sessions} · ADMIN user unlocked</p>
+        <button class="btn" id="toSql">Open SQL worksheet</button>
+      </div>
+    </div>`;
+}
+  if (state.tab === "connection") {
+    const host = `${d.display}.adb.${d.region}.example.cloud`;
+    const high = `(description=(retry_count=20)(address=(protocol=tcps)(port=1522)(host=${host}))(connect_data=(service_name=${d.display}_high.adb.oraclecloud.example))(security=(ssl_server_dn_match=yes)))`;
+    return `<div class="panel" style="padding:16px">
+      <h3 style="margin:0 0 8px">Connection strings</h3>
+      <p class="sub">TLS required. Wallet ${d.wallet? "downloaded in this session (simulated).": "not downloaded yet."}</p>
+      ${["high","medium","low"].map(level => `
+        <label>${d.display}_${level}
+          <textarea readonly class="mono">${high.replace("_high", "_" + level)}</textarea>
+        </label>`).join("")}
+      <div class="row">
+        <button class="btn primary" id="wallet">Download wallet (simulated)</button>
+        <button class="btn" data-copy="${high}">Copy high service</button>
+      </div>
+    </div>`;
+}
+  if (state.tab === "metrics") {
+    const max = Math.max(...d.series);
+    return `<div class="panel" style="padding:16px">
+      <div class="row"><b>CPU %</b> last 12 hours<div class="sp"></div><span class="sub" style="margin:0">Sampled locally</span></div>
+      <div class="chart">${d.series.map((v,i) => `<div class="bar" style="height:${Math.max(6, v/max*140)}px" title="${v}%"><span>${i%3===0?v+"%":""}</span></div>`).join("")}</div>
+      <div class="cards" style="margin-top:16px">
+        <div class="stat"><div class="k">Avg CPU</div><div class="v">${Math.round(d.series.reduce((a,b)=>a+b,0)/d.series.length)}%</div></div>
+        <div class="stat"><div class="k">Sessions</div><div class="v">${d.sessions}</div></div>
+        <div class="stat"><div class="k">Storage used</div><div class="v">${d.storageUsed} TB</div></div>
+        <div class="stat"><div class="k">Failed logons</div><div class="v">0</div></div>
+      </div>
+    </div>`;
+}
+  if (state.tab === "backups") {
+    const rows = state.backups.filter(b => b.dbId === d.id);
+    return `<div class="row" style="margin-bottom:10px"><div class="sp"></div><button class="btn" id="manualBkp">Create manual backup</button></div>
+      <div class="panel"><table><thead><tr><th>When</th><th>Type</th><th>Size</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows.map(b => `<tr><td>${fmt(b.when)}</td><td>${b.type}</td><td>${b.size}</td><td>${pill("Available").replace("Available","Completed")}</td><td><button class="btn" data-restore="${b.id}">Restore</button></td></tr>`).join("") || `<tr><td colspan="5" class="empty">No backups</td></tr>`}</tbody></table></div>`;
+}
+  return `<div class="panel" style="padding:16px;max-width:560px">
+    <h3 style="margin-top:0">Scale</h3>
+    <div class="two">
+      <label>OCPU count<input id="ocpu" type="number" min="1" max="128" value="${d.ocpu}" /></label>
+      <label>Storage (TB)<input id="tb" type="number" min="1" max="128" value="${d.storageTB}" /></label>
+    </div>
+    <label style="margin-top:12px"><span><input type="checkbox" id="auto" ${d.autoScaling?"checked":""}/> Enable CPU auto scaling</span></label>
+    <div class="row" style="margin-top:14px"><button class="btn primary" id="applyScale">Apply</button></div>
+  </div>`;
+}
+
+function viewBackups() {
+  const rows = state.backups.filter(b => b.region === state.region);
+  return `<h1>Backups</h1><p class="sub">Automatic daily backups retained for databases in ${state.region}.</p>
+    <div class="panel"><table><thead><tr><th>Database</th><th>When</th><th>Type</th><th>Size</th><th>Status</th></tr></thead>
+    <tbody>${rows.map(b => `<tr><td class="linkish" data-open="${b.dbId}">${esc(b.db)}</td><td>${fmt(b.when)}</td><td>${b.type}</td><td>${b.size}</td><td>${pill("Available").replace("Available", b.status)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function viewSql() {
+  const opts = state.dbs.filter(d => d.region === state.region).map(d => `<option value="${d.id}" ${d.id===state.sqlDb?"selected":""}>${esc(d.display)} (${d.status})</option>`).join("");
+  return `<h1>SQL Worksheet</h1><p class="sub">Runs a tiny in-browser dialect against the selected database catalog. Not a real Oracle engine.</p>
+    <div class="row" style="margin-bottom:10px">
+      <select id="sqlDb" class="btn">${opts}</select>
+      <button class="btn primary" id="runSql">Run</button>
+      <button class="btn" id="sample">Load sample</button>
+    </div>
+    <textarea id="sql" class="mono">${esc(state.sqlText)}</textarea>
+    <div class="sql-out mono" style="margin-top:12px">${esc(state.sqlResult || "Results appear here.")}</div>`;
+}
+
+function viewUsage() {
+  const rows = state.dbs.map(d => {
+    const hours = d.status === "Available"? 24: 0;
+    const cost = +(d.ocpu *hours* 0.48 + d.storageTB * 0.12).toFixed(2);
+    return {...d, hours, cost};
+});
+  const total = rows.reduce((a,r) => a + r.cost, 0);
+  return `<h1>Usage & billing</h1><p class="sub">Illustrative rates only: $0.48 / OCPU-hour while running, $0.12 / TB-day storage. Not an invoice.</p>
+    <div class="cards"><div class="stat"><div class="k">Estimated last 24h</div><div class="v">$${total.toFixed(2)}</div></div></div>
+    <div class="panel"><table><thead><tr><th>Database</th><th>Region</th><th>OCPU</th><th>Running hours</th><th>Est. cost</th></tr></thead>
+    <tbody>${rows.map(r => `<tr><td>${esc(r.display)}</td><td>${r.region}</td><td>${r.ocpu}</td><td>${r.hours}</td><td>$${r.cost.toFixed(2)}</td></tr>`).join("")}
+    <tr><td colspan="4"><b>Total</b></td><td><b>$${total.toFixed(2)}</b></td></tr></tbody></table></div>`;
+}
+
+function esc(s) {
+  return String(s?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function openModal(html) {
+  $("#modal").innerHTML = html;
+  $("#modal").classList.add("show");
+}
+function closeModal() {$("#modal").classList.remove("show"); $("#modal").innerHTML = "";}
+
+function createModal() {
+  openModal(`<div class="modal">
+    <div class="modal-h"><h2>Create Autonomous Database</h2><div class="sp"></div><button class="btn" id="x">Close</button></div>
+    <div class="modal-b">
+      <label>Display name<input id="n" type="text" value="app-adb" maxlength="30" /></label>
+      <div class="two">
+        <label>Workload type<select id="w"><option>Transaction Processing</option><option>Data Warehouse</option><option>JSON</option><option>APEX</option></select></label>
+        <label>Database version<select><option>19c</option><option>23ai</option></select></label>
+      </div>
+      <div class="two">
+        <label>OCPU<input id="o" type="number" min="1" max="128" value="1" /></label>
+        <label>Storage (TB)<input id="s" type="number" min="1" max="128" value="1" /></label>
+      </div>
+      <label>ADMIN password<input id="p" type="password" placeholder="12+ chars, mixed case, number" /></label>
+      <label><span><input type="checkbox" id="as" checked /> CPU auto scaling</span></label>
+      <p class="sub" style="margin:0">Provisioning is simulated and finishes in a few seconds.</p>
+    </div>
+    <div class="modal-f"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="go">Create</button></div>
+  </div>`);
+  $("#x").onclick = $("#cancel").onclick = closeModal;
+  $("#go").onclick = () => {
+    const name = $("#n").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const pass = $("#p").value;
+    if (!/^[a-z][a-z0-9-]{1,28}$/.test(name)) return toast("Name must start with a letter and use a-z, 0-9, hyphen.");
+    if (state.dbs.some(d => d.display === name && d.region === state.region)) return toast("Name already used in this region.");
+    if (pass.length < 12 ||!/[A-Z]/.test(pass) ||!/[a-z]/.test(pass) ||!/[0-9]/.test(pass)) return toast("Password needs 12+ chars with upper, lower, and a number.");
+    const d = db(name, $("#w").value, "Provisioning", +$("#o").value, +$("#s").value, "AL32UTF8", $("#as").checked);
+    d.region = state.region;
+    d.display = name;
+    state.dbs.unshift(d);
+    closeModal();
+    toast("Provisioning " + name + "…");
+    render();
+    setTimeout(() => {
+      d.status = "Available";
+      d.cpuPct = 6;
+      seedBackups(d);
+      toast(name + " is Available");
+      render();
+}, 1600);
+};
+}
+
+function runSql() {
+  const d = find(state.sqlDb);
+  const sql = ($("#sql")?.value || state.sqlText).trim();
+  state.sqlText = sql;
+  if (!d) {state.sqlResult = "Select a database."; render(); return;}
+  if (d.status!== "Available") {state.sqlResult = `ORA-12514: database ${d.display} is ${d.status}. Start it before connecting.`; render(); return;}
+  const q = sql.replace(/\s+/g, " ").trim().replace(/;$/, "");
+  const low = q.toLowerCase();
+  const tables = [
+    ["SALES", 184220], ["CUSTOMERS", 40211], ["ORDERS", 99012], ["PRODUCTS", 1288], ["AUDIT_LOG", 12]
+];
+  if (/^select\s+\*\s+from\s+v\$version/i.test(q) || /from\s+v\$version/i.test(low)) {
+    state.sqlResult = "BANNER\nOracle Database 19c Enterprise Edition — simulator 19.0.0.0.0";
+} else if (/^select\s+table_name/i.test(q) && /user_tables/.test(low)) {
+    const lines = ["TABLE_NAME        NUM_ROWS", "----------------  --------",...tables.map(t => t[0].padEnd(18) + String(t[1]))];
+    state.sqlResult = lines.join("\n") + "\n\n5 rows selected.";
+} else if (/^select\s+count\(\*\)\s+from\s+(\w+)/i.test(q)) {
+    const name = q.match(/from\s+(\w+)/i)[1].toUpperCase();
+    const row = tables.find(t => t[0] === name);
+    state.sqlResult = row? `COUNT(*)\n${row[1]}\n\n1 row selected.`: `ORA-00942: table or view ${name} does not exist`;
+} else if (/^select\s+sysdate/i.test(q) || /^select\s+current_timestamp/i.test(q)) {
+    state.sqlResult = "SYSDATE\n" + new Date().toISOString().replace("T", " ").slice(0, 19);
+} else if (/^select\s+/i.test(q)) {
+    state.sqlResult = "Simulator supports:\n  SELECT * FROM v$version\n  SELECT table_name, num_rows FROM user_tables\n  SELECT COUNT(*) FROM <known table>\n  SELECT SYSDATE FROM dual";
+} else if (/^(drop|truncate|delete|update|alter|grant)\b/i.test(q)) {
+    state.sqlResult = "ORA-01031: simulator refuses mutating statements.";
+} else {
+    state.sqlResult = "ORA-00900: invalid SQL statement (simulator dialect).";
+}
+  render();
+}
+
+function bind() {
+  document.querySelectorAll("[data-open]").forEach(el => el.addEventListener("click", e => {
+    e.stopPropagation();
+    state.selected = el.dataset.open;
+    state.view = "detail";
+    state.tab = "overview";
+    render();
+}));
+  document.querySelectorAll("[data-tab]").forEach(el => el.addEventListener("click", () => {state.tab = el.dataset.tab; render();}));
+  document.querySelectorAll("[data-copy]").forEach(el => el.addEventListener("click", e => {
+    e.stopPropagation();
+    navigator.clipboard?.writeText(el.dataset.copy);
+    toast("Copied");
+}));
+  $("#q") && ($("#q").oninput = e => {state.q = e.target.value; render(); $("#q").focus();});
+  $("#region") && ($("#region").onchange = e => {state.region = e.target.value; render();});
+  $("#create") && ($("#create").onclick = createModal);
+  $("#back") && ($("#back").onclick = () => {state.view = "list"; render();});
+  $("#start") && ($("#start").onclick = () => transition("Starting", "Available", "Database started"));
+  $("#stop") && ($("#stop").onclick = () => transition("Stopping", "Stopped", "Database stopped"));
+  $("#terminate") && ($("#terminate").onclick = () => {
+    const d = find(state.selected);
+    if (!confirm("Terminate " + d.display + "? This removes it from the simulator.")) return;
+    state.dbs = state.dbs.filter(x => x.id!== d.id);
+    state.backups = state.backups.filter(b => b.dbId!== d.id);
+    state.view = "list";
+    toast("Terminated " + d.display);
+    render();
+});
+  $("#toSql") && ($("#toSql").onclick = () => {state.sqlDb = state.selected; state.view = "sql"; render();});
+  $("#wallet") && ($("#wallet").onclick = () => {
+    const d = find(state.selected);
+    d.wallet = true;
+    const blob = new Blob([`# simulated wallet for ${d.display}\nhost=${d.display}.adb.${d.region}.example.cloud\n`], {type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = d.display + "-wallet.txt";
+    a.click();
+    toast("Wallet file downloaded (demo)");
+    render();
+});
+  $("#manualBkp") && ($("#manualBkp").onclick = () => {
+    const d = find(state.selected);
+    state.backups.unshift({id: "bkp-m-"+Date.now(), dbId: d.id, db: d.display, type: "Manual", when: new Date().toISOString(), size: d.storageUsed + " GB", status: "Completed", region: d.region});
+    toast("Manual backup completed");
+    render();
+});
+  document.querySelectorAll("[data-restore]").forEach(el => el.addEventListener("click", () => {
+    const d = find(state.selected);
+    d.status = "Restoring";
+    render();
+    setTimeout(() => {d.status = "Available"; toast("Restore finished"); render();}, 1400);
+}));
+  $("#applyScale") && ($("#applyScale").onclick = () => {
+    const d = find(state.selected);
+    const o = Math.max(1, Math.min(128, +$("#ocpu").value || 1));
+    const tb = Math.max(1, Math.min(128, +$("#tb").value || 1));
+    if (tb < d.storageTB) return toast("Storage can only increase in this simulator.");
+    d.status = "Scaling";
+    render();
+    setTimeout(() => {
+      d.ocpu = o; d.storageTB = tb; d.autoScaling = $("#auto").checked; d.status = "Available";
+      toast("Scale applied");
+      render();
+}, 1200);
+});
+  $("#runSql") && ($("#runSql").onclick = () => {state.sqlDb = $("#sqlDb").value; state.sqlText = $("#sql").value; runSql();});
+  $("#sqlDb") && ($("#sqlDb").onchange = e => {state.sqlDb = e.target.value;});
+  $("#sample") && ($("#sample").onclick = () => {state.sqlText = "SELECT * FROM v$version;"; if ($("#sql")) $("#sql").value = state.sqlText;});
+}
+
+function transition(mid, end, msg) {
+  const d = find(state.selected);
+  d.status = mid;
+  if (end === "Stopped") {d.cpuPct = 0; d.sessions = 0;}
+  render();
+  setTimeout(() => {
+    d.status = end;
+    if (end === "Available") {d.cpuPct = 9; d.sessions = 4;}
+    toast(msg);
+    render();
+}, 1100);
+}
+
+document.querySelectorAll(".nav-btn").forEach(b => b.addEventListener("click", () => {
+  state.view = b.dataset.view;
+  render();
+}));
+render();
+</script>
+</body>
+</html>

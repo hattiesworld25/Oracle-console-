@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Database Console</title>
+</head>
+<body>
+<script>
+(function () {
+  var CSS = ""
+    + ":root{--red:#c74634;--red-d:#a33a2b;--ink:#161513;--muted:#6b6560;--line:#e6e2dc;--bg:#f6f5f3;--ok:#1b7a4a;--ok-bg:#e7f6ee;--warn:#9a6700;--warn-bg:#fff6e0;--stop:#8a3a32;--stop-bg:#fdecea;--blue:#1f4e8c}"
+    + "*{box-sizing:border-box}html,body{margin:0;height:100%}"
+    + "body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-rows:56px 1fr;grid-template-columns:228px 1fr;grid-template-areas:\"top top\" \"side main\"}"
+    + "header{grid-area:top;background:#1c1917;color:#fff;display:flex;align-items:center;gap:18px;padding:0 16px}"
+    + ".brand{display:flex;align-items:center;gap:10px;font-weight:700}.mark{width:28px;height:28px;border-radius:7px;background:#c74634;display:grid;place-items:center;font-weight:800}"
+    + ".crumb{color:#c8c2bb;font-size:13px}.crumb b{color:#fff}.hdr-sp,.sp{flex:1}"
+    + ".region,.avatar{background:#2c2826;border:1px solid #3d3835;color:#eee;border-radius:8px;padding:6px 10px;font-size:12px}"
+    + ".avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700}"
+    + "aside{grid-area:side;background:#fff;border-right:1px solid var(--line);padding:14px 10px}"
+    + ".nav-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 6px}"
+    + ".nav-btn{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}"
+    + ".nav-btn.active,.nav-btn:hover{background:#f4efe9}.nav-btn.active{font-weight:600;box-shadow:inset 3px 0 0 var(--red)}"
+    + "main{grid-area:main;overflow:auto;padding:22px 28px 48px}h1{font-size:22px;margin:0 0 4px}.sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}"
+    + ".row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}button,select,input,textarea{font:inherit}"
+    + ".btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13.5px}"
+    + ".btn.primary{background:var(--red);border-color:var(--red-d);color:#fff}.btn.danger{color:var(--stop)}"
+    + ".search,input,select,textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}.search{min-width:220px}"
+    + ".cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}"
+    + ".stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}"
+    + ".k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:700}"
+    + ".panel{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}"
+    + "table{width:100%;border-collapse:collapse;font-size:13.5px}th{text-align:left;font-size:12px;color:var(--muted);padding:10px 14px;background:#faf9f7}"
+    + "td{padding:12px 14px;border-top:1px solid #f0ece7}tr.click td{cursor:pointer}tr.click:hover td{background:#fbf8f5}"
+    + ".pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}"
+    + ".pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.stop{background:var(--stop-bg);color:var(--stop)}"
+    + ".dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}.linkish{color:var(--blue);font-weight:600}"
+    + ".tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 16px}"
+    + ".tab{border:0;background:transparent;padding:10px 12px;cursor:pointer;font-weight:600;color:var(--muted)}.tab.on{color:var(--ink);border-bottom:2px solid var(--red)}"
+    + ".grid2{display:grid;grid-template-columns:1.2fr.8fr;gap:14px}.kv{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;font-size:13.5px}.kv span{color:var(--muted)}"
+    + ".mono{font-family:ui-monospace,monospace;font-size:12px}.chart{height:160px;display:flex;align-items:flex-end;gap:6px}"
+    + ".bar{flex:1;background:#c74634;border-radius:5px 5px 2px 2px;min-height:4px}"
+    + ".modal-bg{position:fixed;inset:0;background:rgba(22,21,19,.45);display:none;place-items:center;z-index:20}.modal-bg.show{display:grid}"
+    + ".modal{width:min(640px,calc(100vw - 32px));background:#fff;border-radius:14px}.modal h2{margin:0;font-size:18px}"
+    + ".modal-h,.modal-f{padding:16px 18px;display:flex;align-items:center;gap:10px}.modal-h{border-bottom:1px solid var(--line)}.modal-f{border-top:1px solid var(--line);justify-content:flex-end}"
+    + ".modal-b{padding:16px 18px;display:grid;gap:12px}label{font-size:12.5px;font-weight:600;display:grid;gap:6px}input,select,textarea{width:100%}textarea{min-height:140px}"
+    + ".two{display:grid;grid-template-columns:1fr 1fr;gap:12px}"
+    + ".toast{position:fixed;bottom:18px;right:18px;background:#1c1917;color:#fff;padding:12px 14px;border-radius:10px;display:none;z-index:30;max-width:320px}.toast.show{display:block}"
+    + ".sql-out{background:#1c1917;color:#efeae4;border-radius:10px;padding:12px;min-height:120px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px}"
+    + ".empty{padding:28px;text-align:center;color:var(--muted)}.badge{font-size:11px;background:#f4efe9;border-radius:6px;padding:2px 6px}"
+    + ".note{background:#fff8f3;border:1px solid #f0d7cc;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px}"
+    + ".err{color:#8a3a32;font-size:13px;min-height:1em}"
+    + "@media(max-width:1100px){.cards,.grid2,.two{grid-template-columns:1fr 1fr}}"
+    + "@media(max-width:720px){body{grid-template-columns:1fr;grid-template-rows:56px auto 1fr;grid-template-areas:\"top\" \"side\" \"main\"}aside{display:flex;gap:6px;overflow:auto}.nav-label{display:none}.nav-btn{width:auto;white-space:nowrap}.cards,.grid2,.two{grid-template-columns:1fr}}";
+
+  var SHELL = ""
+    + "<header><div class=\"brand\"><div class=\"mark\">DB</div> Cloud Database</div>"
+    + "<div class=\"crumb\">Console / <b>Autonomous Database</b></div><div class=\"hdr-sp\"></div>"
+    + "<div class=\"region\" id=\"regionLabel\" title=\"Click to switch region\">us-ashburn-1</div>"
+    + "<div class=\"avatar\">AL</div></header>"
+    + "<aside><div class=\"nav-label\">Database</div>"
+    + "<button type=\"button\" class=\"nav-btn active\" data-view=\"list\">Autonomous Databases</button>"
+    + "<button type=\"button\" class=\"nav-btn\" data-view=\"backups\">Backups</button>"
+    + "<button type=\"button\" class=\"nav-btn\" data-view=\"sql\">SQL Worksheet</button>"
+    + "<div class=\"nav-label\">Account</div>"
+    + "<button type=\"button\" class=\"nav-btn\" data-view=\"usage\">Usage & billing</button></aside>"
+    + "<main id=\"app\"></main><div class=\"modal-bg\" id=\"modal\"></div><div class=\"toast\" id=\"toast\"></div>";
+
+  var REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1", "ap-tokyo-1"];
+  var REGION_CODE = {"us-ashburn-1": "iad", "us-phoenix-1": "phx", "eu-frankfurt-1": "fra", "uk-london-1": "lhr", "ap-tokyo-1": "nrt"};
+  var WORKLOADS = {ATP: "Transaction Processing", ADW: "Data Warehouse", AJD: "JSON", APEX: "APEX"};
+  var BUSY = ["provisioning", "starting", "stopping", "scaling", "backing_up", "restoring", "terminating"];
+  var EXAMPLES = [
+    "SHOW TABLES;",
+    "SELECT * FROM customers;",
+    "SELECT name, spend FROM customers WHERE spend > 500;",
+    "SELECT * FROM orders WHERE status = 'OPEN';",
+    "INSERT INTO customers (name, region, spend) VALUES ('Ada', 'ashburn', 1200);",
+    "UPDATE orders SET status = 'PAID' WHERE id = 101;",
+    "HELP;"
+];
+  var STORAGE_KEY = "cdb_sim_v1";
+
+  function start() {
+    injectCss();
+    if (!document.getElementById("app")) document.body.insertAdjacentHTML("afterbegin", SHELL);
+    if (!document.getElementById("modal")) document.body.insertAdjacentHTML("beforeend", "<div class=\"modal-bg\" id=\"modal\"></div>");
+    if (!document.getElementById("toast")) document.body.insertAdjacentHTML("beforeend", "<div class=\"toast\" id=\"toast\"></div>");
+    if (!document.getElementById("app")) return;
+
+    var saved = loadSaved();
+    var state = {
+      region: saved && REGIONS.indexOf(saved.region)!== -1? saved.region: "us-ashburn-1",
+      view: "list",
+      q: "",
+      selected: null,
+      tab: "overview",
+      sql: "SELECT * FROM customers;",
+      sqlDb: null,
+      sqlOut: "Ready. Run SELECT * FROM customers; or click Example.\nCtrl+Enter runs the worksheet.",
+      exampleIdx: -1,
+      dbs: saved? saved.dbs: freshDbs()
+};
+    var pendingRender = false;
+    var toastTimer = 0;
+
+    catchUp();
+    save();
+
+    function esc(s) {
+      return String(s == null? "": s).replace(/[&<>"']/g, function (c) {
+        return {"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"}[c];
+});
+}
+    function uid(prefix) {return prefix + "_" + Math.random().toString(36).slice(2, 10);}
+    function ocid(region) {
+      var code = REGION_CODE[region] || "iad";
+      return "ocid1.autonomousdatabase.oc1." + code + "." + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2) + "sim";
+}
+    function money(n) {
+      return Number(n || 0).toLocaleString("en-US", {style: "currency", currency: "USD", maximumFractionDigits: 2});
+}
+    function fmt(ts) {
+      return new Date(ts).toLocaleString(undefined, {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"});
+}
+    function ago(ts) {
+      var s = Math.max(1, Math.round((Date.now() - ts) / 1000));
+      if (s < 60) return s + "s ago";
+      var m = Math.round(s / 60);
+      if (m < 60) return m + "m ago";
+      var h = Math.round(m / 60);
+      if (h < 48) return h + "h ago";
+      return Math.round(h / 24) + "d ago";
+}
+    function statusLabel(s) {
+      return String(s || "").replace(/_/g, " ").replace(/\b\w/g, function (c) {return c.toUpperCase();});
+}
+    function pill(status) {
+      var kind = status === "available"? "ok": status === "stopped"? "stop": "warn";
+      return "<span class=\"pill " + kind + "\"><span class=\"dot\"></span>" + esc(statusLabel(status)) + "</span>";
+}
+    function clone(obj) {return JSON.parse(JSON.stringify(obj));}
+    function get(id) {return state.dbs.filter(function (d) {return d.id === id;})[0] || null;}
+    function busy(db) {return BUSY.indexOf(db.status)!== -1;}
+    function slug(value) {
+      var s = String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (!s) return "";
+      if (!/^[a-z]/.test(s)) s = "db" + s;
+      return s.slice(0, 30);
+}
+    function monthlyCost(db) {
+      var on = db.status!== "stopped" && db.status!== "stopping";
+      var compute = on? db.ecpu *(db.license === "byol"? 0.16: 0.34)* 730: 0;
+      var storage = db.storageTb * 25;
+      return {compute: compute, storage: storage, total: compute + storage};
+}
+    function connString(db, svc) {
+      var host = db.name + ".adb." + db.region + ".example.invalid";
+      var service = db.name + "_" + svc + ".adb.example.invalid";
+      return "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=" + host + "))(connect_data=(service_name=" + service + "))(security=(ssl_server_dn_match=yes)))";
+}
+    function logEvent(db, text) {
+      db.events.unshift({t: Date.now(), text: text});
+      if (db.events.length > 8) db.events.length = 8;
+}
+    function schedule(db, status, next, ms) {
+      db.status = status;
+      db.nextStatus = next;
+      db.until = Date.now() + ms;
+}
+    function pushBackup(db, name, type) {
+      db.backups.unshift({
+        id: uid("bk"),
+        name: name,
+        type: type,
+        at: Date.now(),
+        sizeGb: Math.max(1, Math.round(db.storageTb * 48 + db.tables.customers.rows.length)),
+        tables: clone(db.tables)
+});
+      db.backups = db.backups.slice(0, 12);
+}
+    function finishJob(db) {
+      var prev = db.status;
+      var next = db.nextStatus;
+      db.status = next;
+      db.until = null;
+      db.nextStatus = null;
+      if (next === "terminated") {
+        toast(db.name + " terminated");
+        state.dbs = state.dbs.filter(function (d) {return d.id!== db.id;});
+        if (state.selected === db.id) {state.selected = null; state.view = "list";}
+        return;
+}
+      if (prev === "backing_up" && db.pendingBackup) {
+        pushBackup(db, db.pendingBackup.name, "manual");
+        logEvent(db, "Backup created: " + db.pendingBackup.name);
+        db.pendingBackup = null;
+}
+      if (prev === "restoring" && db.pendingRestore) {
+        var bk = db.backups.filter(function (b) {return b.id === db.pendingRestore;})[0];
+        if (bk && bk.tables) db.tables = clone(bk.tables);
+        logEvent(db, "Restored from " + (bk? bk.name: "backup"));
+        db.pendingRestore = null;
+}
+      if (next === "available" && prev!== "scaling" && prev!== "backing_up") db.lastStartedAt = Date.now();
+      logEvent(db, statusLabel(prev) + " complete");
+      toast(db.name + " is " + statusLabel(next));
+}
+    function catchUp() {
+      var now = Date.now();
+      state.dbs.slice().forEach(function (db) {
+        if (db.until && db.until <= now) finishJob(db);
+});
+}
+    function save() {
+      try {localStorage.setItem(STORAGE_KEY, JSON.stringify({region: state.region, dbs: state.dbs}));} catch (err) {}
+}
+    function toast(msg) {
+      var el = document.getElementById("toast");
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {el.classList.remove("show");}, 2800);
+}
+    function closeModal() {
+      var modal = document.getElementById("modal");
+      modal.classList.remove("show");
+      modal.innerHTML = "";
+      if (pendingRender) {pendingRender = false; render();}
+}
+    function openModal(title, body, footer) {
+      var modal = document.getElementById("modal");
+      modal.innerHTML = "<div class=\"modal\" role=\"dialog\" aria-modal=\"true\"><div class=\"modal-h\"><h2></h2><div class=\"sp\"></div><button type=\"button\" class=\"btn\" data-close=\"1\">Close</button></div><div class=\"modal-b\"></div><div class=\"modal-f\"></div></div>";
+      modal.querySelector("h2").textContent = title;
+      modal.querySelector(".modal-b").innerHTML = body;
+      modal.querySelector(".modal-f").innerHTML = footer;
+      modal.classList.add("show");
+      modal.querySelectorAll("[data-close]").forEach(function (btn) {btn.addEventListener("click", closeModal);});
+      var first = modal.querySelector("input, select, textarea");
+      if (first) setTimeout(function () {first.focus();}, 0);
+      return modal;
+}
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {toast("Copied");}).catch(function () {fallbackCopy(text);});
+} else fallbackCopy(text);
+}
+    function fallbackCopy(text) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {document.execCommand("copy"); toast("Copied");} catch (err) {toast("Copy failed");}
+      ta.remove();
+}
+    function download(filename, text) {
+      var blob = new Blob([text], {type: "text/plain"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () {URL.revokeObjectURL(url);}, 1000);
+}
+    function visible() {
+      var q = state.q.trim().toLowerCase();
+      return state.dbs.filter(function (d) {
+        if (d.region!== state.region || d.status === "terminated") return false;
+        if (!q) return true;
+        return d.name.indexOf(q)!== -1 || String(d.display).toLowerCase().indexOf(q)!== -1;
+});
+}
+    function noteHtml() {
+      return "<div class=\"note\">Simulated console. No cloud resources are created, billed, or reachable. Connection hosts use example.invalid.</div>";
+}
+    function dbRow(db) {
+      return "<tr class=\"click\" data-action=\"open\" data-id=\"" + esc(db.id) + "\">"
+        + "<td><div class=\"linkish\">" + esc(db.name) + "</div><div class=\"k\">" + esc(db.display) + "</div></td>"
+        + "<td>" + esc(db.workload) + " <span class=\"badge\">" + esc(WORKLOADS[db.workload] || db.workload) + "</span></td>"
+        + "<td>" + pill(db.status) + "</td><td>" + db.ecpu + "</td><td>" + db.storageTb + " TB</td>"
+        + "<td>" + (db.license === "byol"? "BYOL": "Included") + "</td><td>" + esc(fmt(db.createdAt)) + "</td></tr>";
+}
+    function listHtml() {
+      var rows = visible();
+      var available = rows.filter(function (d) {return d.status === "available";}).length;
+      var stopped = rows.filter(function (d) {return d.status === "stopped";}).length;
+      var cost = rows.reduce(function (sum, d) {return sum + monthlyCost(d).total;}, 0);
+      var body = rows.length? rows.map(dbRow).join(""): "<tr><td colspan=\"7\" class=\"empty\">" + esc(state.q.trim()? "No databases match that search.": "No databases in " + state.region + ". Create one, or click the region to switch.") + "</td></tr>";
+      return "<div class=\"row\"><div><h1>Autonomous Databases</h1><p class=\"sub\">Click the region in the header to switch. Rates and metrics are fake.</p></div><div class=\"sp\"></div>"
+        + "<input class=\"search\" id=\"q\" placeholder=\"Search by name\" value=\"" + esc(state.q) + "\">"
+        + "<button type=\"button\" class=\"btn\" data-action=\"reset\">Reset demo</button>"
+        + "<button type=\"button\" class=\"btn primary\" data-action=\"create\">Create database</button></div>"
+        + noteHtml()
+        + "<div class=\"cards\"><div class=\"stat\"><div class=\"k\">Databases</div><div class=\"v\">" + rows.length + "</div></div>"
+        + "<div class=\"stat\"><div class=\"k\">Available</div><div class=\"v\">" + available + "</div></div>"
+        + "<div class=\"stat\"><div class=\"k\">Stopped</div><div class=\"v\">" + stopped + "</div></div>"
+        + "<div class=\"stat\"><div class=\"k\">Est. monthly</div><div class=\"v\">" + money(cost) + "</div></div></div>"
+        + "<div class=\"panel\"><table><thead><tr><th>Name</th><th>Workload</th><th>Status</th><th>ECPU</th><th>Storage</th><th>License</th><th>Created</th></tr></thead><tbody>" + body + "</tbody></table></div>";
+}
+    function actionBar(db) {
+      var id = esc(db.id);
+      var start = db.status === "stopped"? "<button type=\"button\" class=\"btn primary\" data-action=\"start\" data-id=\"" + id + "\">Start</button>": "";
+      var stop = db.status === "available"? "<button type=\"button\" class=\"btn\" data-action=\"stop\" data-id=\"" + id + "\">Stop</button>": "";
+      return "<div class=\"row\">" + start + stop
+        + "<button type=\"button\" class=\"btn\" data-action=\"backup\" data-id=\"" + id + "\">Backup</button>"
+        + "<button type=\"button\" class=\"btn\" data-action=\"wallet\" data-id=\"" + id + "\">Wallet</button>"
+        + "<button type=\"button\" class=\"btn danger\" data-action=\"terminate\" data-id=\"" + id + "\">Terminate</button></div>";
+}
+    function overviewHtml(db) {
+      var cost = monthlyCost(db);
+      var access = db.access === "priv"? "Private endpoint (simulated) · " + fakeIp(db.name): "Secure access from allowed IPs · 0.0.0.0/0";
+      var events = db.events.map(function (ev) {
+        return "<div class=\"row\" style=\"justify-content:space-between;padding:6px 0;border-top:1px solid #f0ece7\"><span>" + esc(ev.text) + "</span><span class=\"k\">" + esc(ago(ev.t)) + "</span></div>";
+}).join("");
+      return "<div class=\"grid2\"><div class=\"panel\" style=\"padding:16px\"><div class=\"kv\">"
+        + "<span>Display name</span><div>" + esc(db.display) + "</div>"
+        + "<span>Database name</span><div>" + esc(db.name) + "</div>"
+        + "<span>OCID</span><div class=\"mono\">" + esc(db.ocid) + " <button type=\"button\" class=\"btn\" data-action=\"copy-ocid\" data-id=\"" + esc(db.id) + "\">Copy</button></div>"
+        + "<span>Workload</span><div>" + esc(db.workload) + " · " + esc(WORKLOADS[db.workload] || "") + "</div>"
+        + "<span>Status</span><div>" + pill(db.status) + "</div>"
+        + "<span>Compartment</span><div>sandbox (simulated)</div>"
+        + "<span>Network</span><div>" + esc(access) + "</div>"
+        + "<span>ECPU</span><div>" + db.ecpu + (db.autoScaling? " · auto scaling on, burst ceiling " + (db.ecpu * 3): "") + "</div>"
+        + "<span>Storage</span><div>" + db.storageTb + " TB</div>"
+        + "<span>License</span><div>" + (db.license === "byol"? "Bring your own license": "License included") + "</div>"
+        + "<span>Created</span><div>" + esc(fmt(db.createdAt)) + "</div>"
+        + "<span>Est. monthly</span><div>" + money(cost.total) + " <span class=\"k\">compute " + money(cost.compute) + " · storage " + money(cost.storage) + "</span></div>"
+        + "</div></div><div class=\"panel\" style=\"padding:16px\"><div class=\"k\">Recent activity</div>" + (events || "<p class=\"sub\">No activity yet.</p>") + "</div></div>";
+}
+    function connectionsHtml(db) {
+      var services = ["high", "medium", "low", "tp", "tpurgent"];
+      var blocks = services.map(function (svc) {
+        return "<div style=\"margin-bottom:12px\"><div class=\"row\"><b>" + esc(db.name) + "_" + svc + "</b><div class=\"sp\"></div>"
+          + "<button type=\"button\" class=\"btn\" data-action=\"copy\" data-service=\"" + svc + "\" data-id=\"" + esc(db.id) + "\">Copy</button></div>"
+          + "<div class=\"mono\" style=\"background:#faf9f7;border:1px solid #e6e2dc;border-radius:8px;padding:8px;margin-top:6px;word-break:break-all\">" + esc(connString(db, svc)) + "</div></div>";
+}).join("");
+      return "<div class=\"grid2\"><div class=\"panel\" style=\"padding:14px 16px\"><div class=\"k\">Connection strings</div><p class=\"sub\">Hosts do not resolve. Nothing is listening.</p>" + blocks + "</div>"
+        + "<div class=\"panel\" style=\"padding:14px 16px\"><div class=\"k\">Wallet</div><p class=\"sub\">Downloads a text stand-in. No certificates are generated.</p>"
+        + "<button type=\"button\" class=\"btn primary\" data-action=\"wallet\" data-id=\"" + esc(db.id) + "\">Download wallet</button><div style=\"height:10px\"></div>"
+        + "<button type=\"button\" class=\"btn\" data-action=\"test-conn\" data-id=\"" + esc(db.id) + "\">Test connection</button>"
+        + "<p class=\"sub\">If the database is available, this reports a fake ADMIN session after a short wait.</p></div></div>";
+}
+    function metricsHtml(db) {
+      var max = Math.max(100, Math.max.apply(null, db.cpu.concat([1])));
+      var bars = db.cpu.map(function (n) {return "<div class=\"bar\" style=\"height:" + Math.round(n / max * 100) + "%\"></div>";}).join("");
+      var used = 20 + (db.name.length * 7) % 45;
+      return "<div class=\"grid2\"><div class=\"panel\" style=\"padding:16px\"><div class=\"row\"><div class=\"k\">CPU utilization</div><div class=\"sp\"></div><b id=\"cpuNow\">" + db.cpu[db.cpu.length - 1] + "%</b></div>"
+        + "<div class=\"chart\" id=\"cpuChart\">" + bars + "</div><p class=\"sub\">Sampled locally. Not telemetry from a cloud region.</p></div>"
+        + "<div class=\"panel\" style=\"padding:16px\"><div class=\"kv\"><span>Storage allocated</span><div>" + db.storageTb + " TB</div>"
+        + "<span>Storage used</span><div>" + used + "% of allocated (simulated)</div>"
+        + "<span>Sessions</span><div>" + (db.status === "available"? db.ecpu * 8 + 3: 0) + "</div>"
+        + "<span>Failed logons</span><div>0</div></div></div></div>";
+}
+    function backupTable(entries, showDb) {
+      if (!entries.length) return "<div class=\"empty\">No backups yet.</div>";
+      var head = "<tr>" + (showDb? "<th>Database</th>": "") + "<th>Backup</th><th>Type</th><th>Taken</th><th>Size</th><th></th></tr>";
+      var body = entries.map(function (item) {
+        return "<tr>" + (showDb? "<td>" + esc(item.db.name) + "</td>": "")
+          + "<td>" + esc(item.bk.name) + "</td><td>" + esc(item.bk.type) + "</td><td>" + esc(ago(item.bk.at)) + "</td><td>" + item.bk.sizeGb + " GB</td>"
+          + "<td><button type=\"button\" class=\"btn\" data-action=\"restore\" data-id=\"" + esc(item.db.id) + "\" data-backup=\"" + esc(item.bk.id) + "\">Restore</button></td></tr>";
+}).join("");
+      return "<table><thead>" + head + "</thead><tbody>" + body + "</tbody></table>";
+}
+    function scaleHtml(db) {
+      return "<div class=\"panel\" style=\"padding:16px;max-width:640px\"><div class=\"two\">"
+        + "<label>ECPU<input id=\"ecpu\" type=\"number\" min=\"1\" max=\"128\" value=\"" + db.ecpu + "\"></label>"
+        + "<label>Storage (TB)<input id=\"storage\" type=\"number\" min=\"1\" max=\"128\" value=\"" + db.storageTb + "\"></label>"
+        + "<label>License<select id=\"license\"><option value=\"included\"" + (db.license!== "byol"? " selected": "") + ">License included</option><option value=\"byol\"" + (db.license === "byol"? " selected": "") + ">Bring your own license</option></select></label>"
+        + "<label style=\"align-content:end\"><span><input id=\"auto\" type=\"checkbox\" style=\"width:auto\"" + (db.autoScaling? " checked": "") + "> Auto scaling</span></label></div>"
+        + "<p class=\"sub\" id=\"scalePreview\"></p><div class=\"err\" id=\"scaleErr\"></div>"
+        + "<button type=\"button\" class=\"btn primary\" data-action=\"apply-scale\" data-id=\"" + esc(db.id) + "\">Apply scale</button>"
+        + "<p class=\"k\">Storage can increase only. Stopped databases are billed for storage only in this simulation.</p></div>";
+}
+    function tabHtml(db) {
+      if (state.tab === "connections") return connectionsHtml(db);
+      if (state.tab === "metrics") return metricsHtml(db);
+      if (state.tab === "backups") {
+        var entries = db.backups.map(function (bk) {return {db: db, bk: bk};});
+        return "<div class=\"row\" style=\"margin-bottom:10px\"><button type=\"button\" class=\"btn primary\" data-action=\"backup\" data-id=\"" + esc(db.id) + "\">Create backup</button></div><div class=\"panel\">" + backupTable(entries, false) + "</div>";
+}
+      if (state.tab === "scale") return scaleHtml(db);
+      return overviewHtml(db);
+}
+    function detailHtml() {
+      var db = get(state.selected);
+      if (!db) {state.view = "list"; return listHtml();}
+      var tabs = ["overview", "connections", "metrics", "backups", "scale"];
+      var tabBtns = tabs.map(function (tab) {
+        return "<button type=\"button\" class=\"tab" + (state.tab === tab? " on": "") + "\" data-action=\"tab\" data-tab=\"" + tab + "\">" + statusLabel(tab) + "</button>";
+}).join("");
+      return "<div class=\"row\" style=\"margin-bottom:12px\"><button type=\"button\" class=\"btn\" data-action=\"back\">Back</button></div>"
+        + "<div class=\"row\"><div><h1>" + esc(db.name) + " <span class=\"badge\">" + esc(db.workload) + "</span></h1><p class=\"sub\">" + esc(db.region) + " · " + esc(db.display) + "</p></div><div class=\"sp\"></div>" + actionBar(db) + "</div>"
+        + noteHtml() + "<div class=\"tabs\">" + tabBtns + "</div>" + tabHtml(db);
+}
+    function backupsHtml() {
+      var entries = [];
+      state.dbs.filter(function (d) {return d.region === state.region;}).forEach(function (db) {
+        db.backups.forEach(function (bk) {entries.push({db: db, bk: bk});});
+});
+      entries.sort(function (a, b) {return b.bk.at - a.bk.at;});
+      return "<div class=\"row\"><div><h1>Backups</h1><p class=\"sub\">Manual and automatic backups for " + esc(state.region) + ". Restore replaces the in-memory demo tables.</p></div><div class=\"sp\"></div>"
+        + "<button type=\"button\" class=\"btn primary\" data-action=\"backup\">Create backup</button></div>" + noteHtml() + "<div class=\"panel\">" + backupTable(entries, true) + "</div>";
+}
+    function sqlHtml() {
+      if (!get(state.sqlDb)) state.sqlDb = state.dbs.length? state.dbs[0].id: null;
+      var options = state.dbs.map(function (d) {
+        return "<option value=\"" + esc(d.id) + "\"" + (d.id === state.sqlDb? " selected": "") + ">" + esc(d.name) + " · " + esc(d.region) + " · " + esc(statusLabel(d.status)) + "</option>";
+}).join("");
+      var editor = state.dbs.length
+? "<div class=\"row\" style=\"margin-bottom:12px\"><label style=\"min-width:280px\">Database<select id=\"sqlDb\">" + options + "</select></label><div class=\"sp\"></div><button type=\"button\" class=\"btn\" data-action=\"sql-example\">Example</button><button type=\"button\" class=\"btn primary\" data-action=\"run-sql\">Run</button></div><textarea id=\"sqlInput\">" + esc(state.sql) + "</textarea><div style=\"height:10px\"></div><div class=\"sql-out\" id=\"sqlOut\">" + esc(state.sqlOut) + "</div>"
+: "<div class=\"panel empty\">Create a database first.</div>";
+      return "<h1>SQL Worksheet</h1><p class=\"sub\">In-memory demo schema only. Not connected to a database service.</p>" + noteHtml() + editor;
+}
+    function usageHtml() {
+      var rows = state.dbs.filter(function (d) {return d.region === state.region;});
+      var total = rows.reduce(function (sum, d) {return sum + monthlyCost(d).total;}, 0);
+      var max = Math.max.apply(null, rows.map(function (d) {return monthlyCost(d).total;}).concat([1]));
+      var bars = rows.map(function (d) {
+        return "<div class=\"bar\" title=\"" + esc(d.name) + "\" style=\"height:" + Math.max(4, Math.round(monthlyCost(d).total / max * 100)) + "%\"></div>";
+}).join("");
+      var body = rows.map(function (d) {
+        var cost = monthlyCost(d);
+        return "<tr><td>" + esc(d.name) + "</td><td>" + pill(d.status) + "</td><td>" + d.ecpu + "</td><td>" + d.storageTb + " TB</td><td>" + money(cost.compute) + "</td><td>" + money(cost.storage) + "</td><td>" + money(cost.total) + "</td></tr>";
+}).join("");
+      return "<h1>Usage & billing</h1><p class=\"sub\">Fake rates: $0.34 or $0.16 per ECPU-hour, $25 per TB-month. Stopped databases accrue storage only.</p>" + noteHtml()
+        + "<div class=\"cards\"><div class=\"stat\"><div class=\"k\">Region</div><div class=\"v\" style=\"font-size:16px\">" + esc(state.region) + "</div></div>"
+        + "<div class=\"stat\"><div class=\"k\">Est. monthly</div><div class=\"v\">" + money(total) + "</div></div></div>"
+        + (rows.length? "<div class=\"panel\" style=\"padding:16px;margin-bottom:14px\"><div class=\"k\">Spend mix</div><div class=\"chart\">" + bars + "</div></div>": "")
+        + "<div class=\"panel\"><table><thead><tr><th>Database</th><th>Status</th><th>ECPU</th><th>Storage</th><th>Compute</th><th>Storage cost</th><th>Total</th></tr></thead><tbody>"
+        + (body || "<tr><td colspan=\"7\" class=\"empty\">Nothing in this region.</td></tr>") + "</tbody></table></div>";
+}
+    function viewHtml() {
+      if (state.view === "detail") return detailHtml();
+      if (state.view === "backups") return backupsHtml();
+      if (state.view === "sql") return sqlHtml();
+      if (state.view === "usage") return usageHtml();
+      return listHtml();
+}
+    function render() {
+      var active = document.activeElement;
+      var snap = null;
+      var app = document.getElementById("app");
+      if (active && app.contains(active) && (active.id === "q" || active.id === "sqlInput")) {
+        snap = {id: active.id, s: active.selectionStart, e: active.selectionEnd};
+}
+      var label = document.getElementById("regionLabel");
+      if (label) label.textContent = state.region;
+      var navView = state.view === "detail"? "list": state.view;
+      document.querySelectorAll(".nav-btn").forEach(function (btn) {
+        btn.classList.toggle("active", btn.dataset.view === navView);
+});
+      app.innerHTML = viewHtml();
+      if (state.view === "detail" && state.tab === "scale") scalePreview();
+      if (snap) {
+        var el = document.getElementById(snap.id);
+        if (el) {
+          el.focus();
+          if (el.setSelectionRange && typeof snap.s === "number") el.setSelectionRange(snap.s, snap.e);
+}
+}
+}
+    function safeRender() {
+      var modal = document.getElementById("modal");
+      if (modal && modal.classList.contains("show")) pendingRender = true;
+      else render();
+}
+    function paintBars() {
+      if (state.view!== "detail" || state.tab!== "metrics") return;
+      var db = get(state.selected);
+      if (!db) return;
+      var bars = document.querySelectorAll("#cpuChart.bar");
+      if (bars.length!== db.cpu.length) return;
+      var max = Math.max(100, Math.max.apply(null, db.cpu));
+      bars.forEach(function (bar, i) {bar.style.height = Math.round(db.cpu[i] / max * 100) + "%";});
+      var now = document.getElementById("cpuNow");
+      if (now) now.textContent = db.cpu[db.cpu.length - 1] + "%";
+}
+    function scalePreview() {
+      var el = document.getElementById("scalePreview");
+      var db = get(state.selected);
+      if (!el ||!db) return;
+      var ecpu = Number(document.getElementById("ecpu").value);
+      var storage = Number(document.getElementById("storage").value);
+      var license = document.getElementById("license").value;
+      if (!isFinite(ecpu) ||!isFinite(storage)) return;
+      el.textContent = "Estimated monthly " + money(monthlyCost({ecpu: ecpu, storageTb: storage, license: license, status: db.status}).total) + " (simulated)";
+}
+    function createPreview() {
+      var el = document.getElementById("c-preview");
+      if (!el) return;
+      var ecpu = Number(document.getElementById("c-ecpu").value);
+      var storage = Number(document.getElementById("c-storage").value);
+      var license = document.getElementById("c-license").value;
+      if (!isFinite(ecpu) ||!isFinite(storage)) return;
+      el.textContent = "Estimated " + money(monthlyCost({ecpu: ecpu, storageTb: storage, license: license, status: "available"}).total) + " / month (simulated)";
+}
+    function openCreate() {
+      var modal = openModal("Create Autonomous Database",
+        "<div class=\"two\"><label>Display name<input id=\"c-display\" maxlength=\"64\" autocomplete=\"off\"></label><label>Database name<input id=\"c-name\" maxlength=\"30\" autocomplete=\"off\"></label></div>"
+        + "<div class=\"two\"><label>Workload<select id=\"c-workload\"><option value=\"ATP\">ATP · Transaction Processing</option><option value=\"ADW\">ADW · Data Warehouse</option><option value=\"AJD\">AJD · JSON</option><option value=\"APEX\">APEX</option></select></label>"
+        + "<label>License<select id=\"c-license\"><option value=\"included\">License included</option><option value=\"byol\">Bring your own license</option></select></label></div>"
+        + "<div class=\"two\"><label>ECPU<input id=\"c-ecpu\" type=\"number\" min=\"1\" max=\"128\" value=\"2\"></label><label>Storage (TB)<input id=\"c-storage\" type=\"number\" min=\"1\" max=\"128\" value=\"1\"></label></div>"
+        + "<label>Network<select id=\"c-access\"><option value=\"secure\">Secure access from allowed IPs</option><option value=\"priv\">Private endpoint (simulated)</option></select></label>"
+        + "<label><span><input id=\"c-auto\" type=\"checkbox\" style=\"width:auto\" checked> Auto scaling</span></label>"
+        + "<div class=\"two\"><label>Admin password<input id=\"c-pass\" type=\"password\" autocomplete=\"new-password\"></label><label>Confirm password<input id=\"c-pass2\" type=\"password\" autocomplete=\"new-password\"></label></div>"
+        + "<p class=\"k\">12–30 characters with upper, lower, and a number. The word admin is rejected. The password is checked and discarded.</p>"
+        + "<div id=\"c-preview\" class=\"k\"></div><div id=\"formErr\" class=\"err\"></div>",
+        "<button type=\"button\" class=\"btn\" data-close=\"1\">Cancel</button><button type=\"button\" class=\"btn primary\" id=\"doCreate\">Create</button>");
+      var display = modal.querySelector("#c-display");
+      var name = modal.querySelector("#c-name");
+      var dirty = false;
+      name.addEventListener("input", function () {dirty = true;});
+      display.addEventListener("input", function () {if (!dirty) name.value = slug(display.value);});
+      ["c-ecpu", "c-storage", "c-license"].forEach(function (id) {
+        modal.querySelector("#" + id).addEventListener("input", createPreview);
+        modal.querySelector("#" + id).addEventListener("change", createPreview);
+});
+      createPreview();
+      modal.querySelector("#doCreate").addEventListener("click", submitCreate);
+}
+    function submitCreate() {
+      var err = document.getElementById("formErr");
+      function fail(msg) {if (err) err.textContent = msg;}
+      var display = document.getElementById("c-display").value.trim();
+      var name = slug(document.getElementById("c-name").value || display);
+      var ecpu = Number(document.getElementById("c-ecpu").value);
+      var storage = Number(document.getElementById("c-storage").value);
+      var pass = document.getElementById("c-pass").value;
+      var pass2 = document.getElementById("c-pass2").value;
+      if (!display) return fail("Display name is required.");
+      if (!/^[a-z][a-z0-9]{0,29}$/.test(name)) return fail("Database name must start with a letter and use lowercase letters or numbers.");
+      if (state.dbs.some(function (d) {return d.region === state.region && d.name === name;})) return fail("That name already exists in this region.");
+      if (!Number.isInteger(ecpu) || ecpu < 1 || ecpu > 128) return fail("ECPU must be a whole number from 1 to 128.");
+      if (!Number.isInteger(storage) || storage < 1 || storage > 128) return fail("Storage must be a whole number of TB from 1 to 128.");
+      if (pass.length < 12 || pass.length > 30 ||!/[A-Z]/.test(pass) ||!/[a-z]/.test(pass) ||!/\d/.test(pass) || /admin/i.test(pass)) return fail("Password does not meet the rules.");
+      if (pass!== pass2) return fail("Passwords do not match.");
+      var db = makeDb({
+        display: display,
+        name: name,
+        workload: document.getElementById("c-workload").value,
+        license: document.getElementById("c-license").value,
+        ecpu: ecpu,
+        storageTb: storage,
+        autoScaling: document.getElementById("c-auto").checked,
+        access: document.getElementById("c-access").value,
+        region: state.region,
+        status: "provisioning",
+        nextStatus: "available",
+        until: Date.now() + 1800,
+        createdAt: Date.now(),
+        events: [{t: Date.now(), text: "Provisioning requested"}]
+});
+      state.dbs.unshift(db);
+      save();
+      closeModal();
+      state.view = "list";
+      render();
+      toast(name + " is provisioning");
+}
+    function openReset() {
+      var modal = openModal("Reset demo data", "<p class=\"sub\">Replace every simulated database in this browser with the original demo set?</p>",
+        "<button type=\"button\" class=\"btn\" data-close=\"1\">Cancel</button><button type=\"button\" class=\"btn danger\" id=\"doReset\">Reset</button>");
+      modal.querySelector("#doReset").addEventListener("click", function () {
+        state.dbs = freshDbs();
+        state.selected = null;
+        state.view = "list";
+        state.sqlOut = "Ready. Run SELECT * FROM customers; or click Example.\nCtrl+Enter runs the worksheet.";
+        save();
+        closeModal();
+        render();
+        toast("Demo data restored");
+});
+}
+    function openTerminate(id) {
+      var db = get(id);
+      if (!db || db.status === "terminating") return;
+      var modal = openModal("Terminate database",
+        "<p class=\"sub\">This removes <b>" + esc(db.name) + "</b> from the simulation. Type the database name to confirm.</p><label>Database name<input id=\"confirmName\" autocomplete=\"off\"></label><div id=\"formErr\" class=\"err\"></div>",
+        "<button type=\"button\" class=\"btn\" data-close=\"1\">Cancel</button><button type=\"button\" class=\"btn danger\" id=\"doTerminate\">Terminate</button>");
+      modal.querySelector("#doTerminate").addEventListener("click", function () {
+        var typed = document.getElementById("confirmName").value.trim();
+        if (typed!== db.name) {document.getElementById("formErr").textContent = "Type " + db.name + " exactly."; return;}
+        logEvent(db, "Terminate requested");
+        schedule(db, "terminating", "terminated", 1200);
+        save();
+        closeModal();
+        render();
+        toast("Terminating " + db.name);
+});
+}
+    function openBackup(presetId) {
+      var preset = presetId? get(presetId): null;
+      if (preset && preset.status!== "available") return toast("Database must be available to back up.");
+      var choices = state.dbs.filter(function (d) {return d.region === state.region && d.status === "available";});
+      if (!preset &&!choices.length) return toast("No available database in this region.");
+      var picker = preset
+? "<input type=\"hidden\" id=\"bkDb\" value=\"" + esc(preset.id) + "\"><div class=\"k\">" + esc(preset.name) + "</div>"
+: "<label>Database<select id=\"bkDb\">" + choices.map(function (d) {return "<option value=\"" + esc(d.id) + "\">" + esc(d.name) + "</option>";}).join("") + "</select></label>";
+      var modal = openModal("Create backup", picker + "<label>Backup name<input id=\"bkName\" placeholder=\"optional\"></label><div id=\"formErr\" class=\"err\"></div>",
+        "<button type=\"button\" class=\"btn\" data-close=\"1\">Cancel</button><button type=\"button\" class=\"btn primary\" id=\"doBackup\">Create backup</button>");
+      modal.querySelector("#doBackup").addEventListener("click", function () {
+        var db = get(document.getElementById("bkDb").value);
+        if (!db || db.status!== "available") return toast("Database must be available.");
+        if (busy(db)) return toast(db.name + " is busy.");
+        var name = document.getElementById("bkName").value.trim() || ("manual-" + stamp());
+        db.pendingBackup = {name: name};
+        logEvent(db, "Backup requested: " + name);
+        schedule(db, "backing_up", "available", 1500);
+        save();
+        closeModal();
+        render();
+        toast("Backing up " + db.name);
+});
+}
+    function openWallet(id) {
+      var db = get(id);
+      if (!db) return;
+      if (db.status!== "available") return toast("Start the database before downloading a wallet.");
+      var modal = openModal("Download wallet",
+        "<p class=\"sub\">Creates a text file for <b>" + esc(db.name) + "</b>. It is not a real wallet.</p><div class=\"two\"><label>Wallet password<input id=\"w1\" type=\"password\"></label><label>Confirm<input id=\"w2\" type=\"password\"></label></div><div id=\"formErr\" class=\"err\"></div>",
+        "<button type=\"button\" class=\"btn\" data-close=\"1\">Cancel</button><button type=\"button\" class=\"btn primary\" id=\"doWallet\">Download</button>");
+      modal.querySelector("#doWallet").addEventListener("click", function () {
+        var a = document.getElementById("w1").value;
+        var b = document.getElementById("w2").value;
+        if (a.length < 8 || a!== b) {document.getElementById("formErr").textContent = "Use a matching password of at least 8 characters."; return;}
+        var services = ["high", "medium", "low", "tp", "tpurgent"];
+        var text = [
+          "SIMULATED WALLET",
+          "This is not an Oracle wallet. No keys or certificates are included.",
+          "Hosts end in example.invalid and do not resolve.",
+          "",
+          "database=" + db.name,
+          "region=" + db.region,
+          "ocid=" + db.ocid,
+          "",
+          "----- tnsnames.ora (simulated) -----",
+          services.map(function (svc) {return db.name + "_" + svc + " = " + connString(db, svc);}).join("\n\n"),
+          "",
+          "----- sqlnet.ora (simulated) -----",
+          "WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY=\"?/network/admin\")))",
+          "SSL_SERVER_DN_MATCH = yes",
+          "",
+          "----- README -----",
+          "The password you typed stayed in this browser to unlock the download.",
+          "It was not sent anywhere and is not stored."
+].join("\n");
+        download(db.name + "-wallet-simulated.txt", text);
+        closeModal();
+        toast("Wallet download started");
+});
+}
+    function startDb(id) {
+      var db = get(id);
+      if (!db) return;
+      if (db.status === "available") return toast(db.name + " is already available.");
+      if (busy(db) || db.status!== "stopped") return toast("Start is available after the database is stopped.");
+      logEvent(db, "Start requested");
+      schedule(db, "starting", "available", 1400);
+      save();
+      safeRender();
+}
+    function stopDb(id) {
+      var db = get(id);
+      if (!db || db.status!== "available") return toast("Stop is available when the database is running.");
+      logEvent(db, "Stop requested");
+      schedule(db, "stopping", "stopped", 1200);
+      save();
+      safeRender();
+}
+    function applyScale(id) {
+      var db = get(id);
+      var err = document.getElementById("scaleErr");
+      function fail(msg) {if (err) err.textContent = msg; toast(msg);}
+      if (!db) return;
+      if (busy(db)) return fail(db.name + " is busy.");
+      var ecpu = Number(document.getElementById("ecpu").value);
+      var storage = Number(document.getElementById("storage").value);
+      var license = document.getElementById("license").value;
+      var auto = document.getElementById("auto").checked;
+      if (!Number.isInteger(ecpu) || ecpu < 1 || ecpu > 128) return fail("ECPU must be a whole number from 1 to 128.");
+      if (!Number.isInteger(storage) || storage < 1 || storage > 128) return fail("Storage must be a whole number of TB from 1 to 128.");
+      if (storage < db.storageTb) return fail("Storage cannot shrink in this simulation.");
+      if (ecpu === db.ecpu && storage === db.storageTb && auto === db.autoScaling && license === db.license) return toast("No changes to apply.");
+      db.ecpu = ecpu;
+      db.storageTb = storage;
+      db.autoScaling = auto;
+      db.license = license;
+      var next = db.status === "stopped"? "stopped": "available";
+      logEvent(db, "Scale requested");
+      schedule(db, "scaling", next, 1200);
+      save();
+      safeRender();
+      toast("Scaling " + db.name);
+}
+    function restoreBackup(dbId, backupId) {
+      var db = get(dbId);
+      if (!db) return;
+      if (busy(db)) return toast(db.name + " is busy.");
+      var bk = db.backups.filter(function (b) {return b.id === backupId;})[0];
+      if (!bk) return toast("Backup not found.");
+      db.pendingRestore = bk.id;
+      logEvent(db, "Restore requested from " + bk.name);
+      schedule(db, "restoring", "available", 1600);
+      save();
+      safeRender();
+      toast("Restoring " + db.name);
+}
+    function runSql() {
+      var input = document.getElementById("sqlInput");
+      if (input) state.sql = input.value;
+      var select = document.getElementById("sqlDb");
+      if (select) state.sqlDb = select.value;
+      var db = get(state.sqlDb);
+      var t0 = performance.now();
+      var text = runAll(db, state.sql);
+      state.sqlOut = text + "\n\nElapsed: " + Math.max(1, Math.round(performance.now() - t0)) + " ms (local)";
+      var out = document.getElementById("sqlOut");
+      if (out) out.textContent = state.sqlOut;
+      save();
+}
+    function tick() {
+      var now = Date.now();
+      var changed = false;
+      state.dbs.forEach(function (db) {
+        if (db.status === "available") {
+          var last = db.cpu[db.cpu.length - 1] || 20;
+          db.cpu.push(Math.max(6, Math.min(96, last + Math.round(Math.random() * 16 - 8))));
+          if (db.cpu.length > 16) db.cpu.shift();
+}
+});
+      state.dbs.slice().forEach(function (db) {
+        if (db.until && now >= db.until) {finishJob(db); changed = true;}
+});
+      if (changed) {save(); safeRender();} else paintBars();
+}
+
+    var handlers = {
+      create: openCreate,
+      reset: openReset,
+      back: function () {state.view = "list"; state.selected = null; render();},
+      open: function (el) {state.selected = el.dataset.id; state.view = "detail"; state.tab = "overview"; render();},
+      tab: function (el) {state.tab = el.dataset.tab; render();},
+      start: function (el) {startDb(el.dataset.id);},
+      stop: function (el) {stopDb(el.dataset.id);},
+      backup: function (el) {openBackup(el.dataset.id);},
+      wallet: function (el) {openWallet(el.dataset.id);},
+      terminate: function (el) {openTerminate(el.dataset.id);},
+      restore: function (el) {restoreBackup(el.dataset.id, el.dataset.backup);},
+      "apply-scale": function (el) {applyScale(el.dataset.id);},
+      "copy-ocid": function (el) {var db = get(el.dataset.id); if (db) copyText(db.ocid);},
+      copy: function (el) {var db = get(el.dataset.id); if (db) copyText(connString(db, el.dataset.service));},
+      "test-conn": function (el) {
+        var db = get(el.dataset.id);
+        if (!db) return;
+        if (db.status!== "available") return toast("Database is not available.");
+        toast("Testing connection…");
+        setTimeout(function () {toast("Connected as ADMIN on " + db.name + " (simulated)");}, 700);
+},
+      "sql-example": function () {
+        state.exampleIdx = (state.exampleIdx + 1) % EXAMPLES.length;
+        state.sql = EXAMPLES[state.exampleIdx];
+        var input = document.getElementById("sqlInput");
+        if (input) input.value = state.sql;
+},
+      "run-sql": runSql
+};
+
+    bind(document.getElementById("app"), "click", function (e) {
+      var el = e.target.closest("[data-action]");
+      if (!el ||!document.getElementById("app").contains(el)) return;
+      var fn = handlers[el.dataset.action];
+      if (fn) fn(el);
+});
+    bind(document.getElementById("app"), "input", function (e) {
+      if (e.target.id === "q") {state.q = e.target.value; render();}
+      if (e.target.id === "sqlInput") state.sql = e.target.value;
+      if (e.target.id === "ecpu" || e.target.id === "storage") scalePreview();
+});
+    bind(document.getElementById("app"), "change", function (e) {
+      if (e.target.id === "sqlDb") state.sqlDb = e.target.value;
+      if (e.target.id === "license" || e.target.id === "ecpu" || e.target.id === "storage") scalePreview();
+});
+    bind(document.getElementById("modal"), "click", function (e) {if (e.target.id === "modal") closeModal();});
+    bind(document, "keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && state.view === "sql") {e.preventDefault(); runSql();}
+});
+    document.querySelectorAll(".nav-btn").forEach(function (btn) {
+      bind(btn, "click", function () {
+        state.view = btn.dataset.view;
+        state.selected = null;
+        render();
+});
+});
+    var regionLabel = document.getElementById("regionLabel");
+    if (regionLabel) {
+      regionLabel.style.cursor = "pointer";
+      regionLabel.title = "Click to switch region";
+      bind(regionLabel, "click", function () {
+        var i = REGIONS.indexOf(state.region);
+        state.region = REGIONS[(i + 1) % REGIONS.length];
+        if (state.view === "detail") {
+          var db = get(state.selected);
+          if (!db || db.region!== state.region) {state.view = "list"; state.selected = null;}
+}
+        save();
+        render();
+        toast("Region " + state.region);
+});
+}
+    if (window.__cdbTimer) clearInterval(window.__cdbTimer);
+    window.__cdbTimer = setInterval(tick, 1200);
+    render();
+}
+
+  function bind(el, type, fn) {
+    if (!el) return;
+    var key = "__cdb" + type;
+    if (el[key]) el.removeEventListener(type, el[key]);
+    el[key] = fn;
+    el.addEventListener(type, fn);
+}
+  function injectCss() {
+    if (document.getElementById("cdb-style")) return;
+    var style = document.createElement("style");
+    style.id = "cdb-style";
+    style.textContent = CSS;
+    document.head.appendChild(style);
+}
+  function seedTables() {
+    return {
+      customers: {
+        columns: ["id", "name", "region", "spend"],
+        rows: [
+          {id: 1, name: "Northwind", region: "ashburn", spend: 1840},
+          {id: 2, name: "Initech", region: "phoenix", spend: 420},
+          {id: 3, name: "Hooli", region: "frankfurt", spend: 2310},
+          {id: 4, name: "Stark", region: "london", spend: 990}
+]
+},
+      orders: {
+        columns: ["id", "customer_id", "sku", "amount", "status"],
+        rows: [
+          {id: 101, customer_id: 1, sku: "ADB-ECPU", amount: 248, status: "OPEN"},
+          {id: 102, customer_id: 3, sku: "STORAGE-TB", amount: 25, status: "PAID"},
+          {id: 103, customer_id: 2, sku: "BACKUP", amount: 12, status: "OPEN"}
+]
+}
+};
+}
+  function makeDb(partial) {
+    var now = Date.now();
+    var db = {
+      id: uid("db"),
+      display: "",
+      name: "",
+      workload: "ATP",
+      status: "available",
+      ecpu: 2,
+      storageTb: 1,
+      autoScaling: true,
+      license: "included",
+      region: "us-ashburn-1",
+      access: "secure",
+      createdAt: now - 86400000 * 12,
+      lastStartedAt: now - 3600000 * 5,
+      cpu: [22, 28, 26, 31, 24, 29, 33, 27, 25, 30, 28, 26, 32, 29, 27, 24],
+      backups: [],
+      events: [],
+      tables: seedTables(),
+      ocid: "",
+      until: null,
+      nextStatus: null,
+      pendingBackup: null,
+      pendingRestore: null
+};
+    Object.keys(partial || {}).forEach(function (key) {db[key] = partial[key];});
+    if (!db.ocid) db.ocid = ocid(db.region);
+    if (!db.events.length) db.events.push({t: db.createdAt, text: "Database created"});
+    return db;
+}
+  function addAuto(db) {
+    db.backups.push({
+      id: uid("bk"),
+      name: "daily-" + new Date(db.createdAt).toISOString().slice(0, 10),
+      type: "automatic",
+      at: db.createdAt + 3600000,
+      sizeGb: Math.max(1, Math.round(db.storageTb * 48)),
+      tables: JSON.parse(JSON.stringify(db.tables))
+});
+}
+  function freshDbs() {
+    var now = Date.now();
+    var sales = makeDb({display: "Sales", name: "sales-adb", workload: "ATP", ecpu: 2, storageTb: 1, region: "us-ashburn-1"});
+    var finance = makeDb({display: "Finance warehouse", name: "finance-dw", workload: "ADW", ecpu: 4, storageTb: 3, region: "us-ashburn-1", createdAt: now - 86400000 * 40});
+    var hr = makeDb({display: "HR JSON", name: "hr-json", workload: "AJD", status: "stopped", ecpu: 1, storageTb: 1, autoScaling: false, license: "byol", region: "us-ashburn-1", lastStartedAt: null, createdAt: now - 86400000 * 8});
+    var staging = makeDb({display: "Staging", name: "staging-atp", workload: "ATP", status: "provisioning", nextStatus: "available", until: now + 2200, ecpu: 1, storageTb: 1, region: "us-ashburn-1", createdAt: now, events: [{t: now, text: "Provisioning requested"}]});
+    var apex = makeDb({display: "APEX apps", name: "apex-apps", workload: "APEX", ecpu: 1, storageTb: 1, region: "us-phoenix-1"});
+    var eu = makeDb({display: "EU ledger", name: "eu-ledger", workload: "ATP", ecpu: 2, storageTb: 2, region: "eu-frankfurt-1"});
+    [sales, finance, hr, apex, eu].forEach(addAuto);
+    return [sales, finance, hr, staging, apex, eu];
+}
+  function hydrate(db) {
+    if (!db.tables) db.tables = seedTables();
+    if (!db.cpu ||!db.cpu.length) db.cpu = [20, 30, 25, 28];
+    if (!db.events) db.events = [];
+    if (!db.backups) db.backups = [];
+    return db;
+}
+  function loadSaved() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data ||!Array.isArray(data.dbs)) return null;
+      data.dbs = data.dbs.map(hydrate);
+      return data;
+} catch (err) {return null;}
+}
+  function fakeIp(name) {
+    var n = 0;
+    for (var i = 0; i < name.length; i++) n += name.charCodeAt(i);
+    return "10.0." + (n % 20) + "." + (10 + (n % 200));
+}
+  function stamp() {
+    var d = new Date();
+    function p(n) {return String(n).padStart(2, "0");}
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
+}
+  function stripComments(sql) {return String(sql || "").replace(/--[^\n]*/g, "");}
+  function splitCsv(s) {
+    var out = [], buf = "", q = null;
+    for (var i = 0; i < s.length; i++) {
+      var c = s[i];
+      if (q) {
+        if (c === q && s[i + 1] === q) {buf += q; i++; continue;}
+        if (c === q) {q = null; buf += c; continue;}
+        buf += c; continue;
+}
+      if (c === "'" || c === "\"") {q = c; buf += c; continue;}
+      if (c === ",") {out.push(buf.trim()); buf = ""; continue;}
+      buf += c;
+}
+    if (buf.trim()) out.push(buf.trim());
+    return out;
+}
+  function splitAnd(where) {
+    var out = [], buf = "", q = null, s = where.trim();
+    for (var i = 0; i < s.length; i++) {
+      var c = s[i];
+      if (q) {buf += c; if (c === q) q = null; continue;}
+      if (c === "'" || c === "\"") {q = c; buf += c; continue;}
+      if (/^and\b/i.test(s.slice(i))) {out.push(buf.trim()); buf = ""; i += 2; continue;}
+      buf += c;
+}
+    if (buf.trim()) out.push(buf.trim());
+    return out.filter(Boolean);
+}
+  function splitKeyword(sql, kw) {
+    var lower = sql.toLowerCase(), key = kw.toLowerCase(), q = null;
+    for (var i = 0; i < sql.length; i++) {
+      var c = sql[i];
+      if (q) {if (c === q) q = null; continue;}
+      if (c === "'" || c === "\"") {q = c; continue;}
+      if (lower.indexOf(key, i) === i && (i === 0 || /\s/.test(sql[i - 1]))) {
+        var after = i + key.length;
+        if (after >= sql.length || /\s/.test(sql[after])) return [sql.slice(0, i).trim(), sql.slice(after).trim()];
+}
+}
+    return [sql.trim(), null];
+}
+  function parseLiteral(raw) {
+    var s = String(raw).trim();
+    if (!s) throw new Error("Missing value.");
+    var q = s[0];
+    if (q === "'" || q === "\"") {
+      if (s[s.length - 1]!== q || s.length < 2) throw new Error("Unclosed string.");
+      return s.slice(1, -1).split(q + q).join(q);
+}
+    if (/^null$/i.test(s)) return null;
+    if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s);
+    throw new Error("Bad value " + s + ". Quote strings.");
+}
+  function compare(op, left, right) {
+    if (op === "=" || op === "!=" || op === "<>") {
+      var same = left === right || String(left) === String(right);
+      return op === "="? same:!same;
+}
+    var ln = Number(left), rn = Number(right);
+    if (!isFinite(ln) ||!isFinite(rn)) throw new Error("That comparison needs numbers.");
+    if (op === ">") return ln > rn;
+    if (op === "<") return ln < rn;
+    if (op === ">=") return ln >= rn;
+    if (op === "<=") return ln <= rn;
+    throw new Error("Unsupported operator.");
+}
+  function matchRow(row, where) {
+    if (!where ||!String(where).trim()) return true;
+    return splitAnd(where).every(function (part) {
+      var m = part.match(/^([a-z_][a-z0-9_]*)\s*(=|!=|<>|>=|<=|>|<)\s*([\s\S]+)$/i);
+      if (!m) throw new Error("Use comparisons joined by AND.");
+      var col = m[1].toLowerCase();
+      if (!Object.prototype.hasOwnProperty.call(row, col)) throw new Error("Unknown column " + col);
+      return compare(m[2], row[col], parseLiteral(m[3]));
+});
+}
+  function formatTable(columns, rows) {
+    var body = rows.map(function (r) {return columns.map(function (c) {return r[c] == null? "": String(r[c]);});});
+    var widths = columns.map(function (c, i) {
+      var lens = body.map(function (r) {return r[i].length;});
+      return Math.max.apply(null, [c.length].concat(lens).concat([1]));
+});
+    function line(vals) {return vals.map(function (v, i) {return v.padEnd(widths[i]);}).join("  ");}
+    var lines = [line(columns), widths.map(function (w) {return "-".repeat(w);}).join("  ")];
+    body.forEach(function (r) {lines.push(line(r));});
+    lines.push("", rows.length + " row(s)");
+    return lines.join("\n");
+}
+  function tableBy(db, name) {
+    var table = db.tables[String(name).toLowerCase()];
+    if (!table) throw new Error("Unknown table " + name + ". Try SHOW TABLES.");
+    return table;
+}
+  function helpText() {
+    return "Simulated worksheet. Statements:\n  SHOW TABLES\n  DESCRIBE customers\n  SELECT * FROM customers\n  SELECT name, spend FROM customers WHERE spend > 500 AND region = 'ashburn'\n  SELECT COUNT(*) FROM orders WHERE status = 'OPEN'\n  INSERT INTO customers (name, region, spend) VALUES ('Ada', 'ashburn', 1200)\n  UPDATE orders SET status = 'PAID' WHERE id = 101\n  DELETE FROM orders WHERE status = 'OPEN'\nStrings use single quotes.";
+}
+  function runOne(db, sql) {
+    try {
+      var s = sql.trim();
+      if (/^help$/i.test(s)) return helpText();
+      if (/^show\s+tables$/i.test(s)) {
+        var tables = Object.keys(db.tables).map(function (name) {return {table: name, rows: db.tables[name].rows.length};});
+        return formatTable(["table", "rows"], tables);
+}
+      var desc = s.match(/^desc(?:ribe)?\s+([a-z_][a-z0-9_]*)$/i);
+      if (desc) {
+        var described = tableBy(db, desc[1]);
+        return formatTable(["column", "type"], described.columns.map(function (c) {
+          var sample = described.rows.filter(function (r) {return r[c]!= null;})[0];
+          return {column: c, type: sample && typeof sample[c] === "number"? "number": "text"};
+}));
+}
+      if (/^select\b/i.test(s)) return runSelect(db, s);
+      if (/^insert\b/i.test(s)) return runInsert(db, s);
+      if (/^update\b/i.test(s)) return runUpdate(db, s);
+      if (/^delete\b/i.test(s)) return runDelete(db, s);
+      return "Error: Supported statements are SELECT, INSERT, UPDATE, DELETE, SHOW TABLES, DESCRIBE, and HELP.";
+} catch (err) {return "Error: " + err.message;}
+}
+  function runSelect(db, sql) {
+    var m = sql.match(/^select\s+([\s\S]+?)\s+from\s+([a-z_][a-z0-9_]*)\s*([\s\S]*)$/i);
+    if (!m) throw new Error("Expected SELECT... FROM table");
+    var table = tableBy(db, m[2]);
+    var rest = m[3].trim();
+    var where = null;
+    if (rest) {
+      if (!/^where\b/i.test(rest)) throw new Error("Only a WHERE clause can follow the table name.");
+      where = rest.replace(/^where\s+/i, "");
+}
+    var rows = table.rows.filter(function (r) {return matchRow(r, where);});
+    var expr = m[1].trim();
+    if (/^count\(\*\)$/i.test(expr)) return formatTable(["count"], [{count: rows.length}]);
+    var cols = expr === "*"? table.columns.slice(): splitCsv(expr).map(function (c) {return c.toLowerCase();});
+    cols.forEach(function (c) {if (table.columns.indexOf(c) === -1) throw new Error("Unknown column " + c);});
+    return formatTable(cols, rows.map(function (r) {
+      var out = {};
+      cols.forEach(function (c) {out[c] = r[c];});
+      return out;
+}));
+}
+  function runInsert(db, sql) {
+    var m = sql.match(/^insert\s+into\s+([a-z_][a-z0-9_]*)\s*(\(([^)]*)\))?\s*values\s*\(([\s\S]*)\)$/i);
+    if (!m) throw new Error("Expected INSERT INTO table (cols) VALUES (...)");
+    var table = tableBy(db, m[1]);
+    var cols = (m[3]? splitCsv(m[3]): table.columns.slice()).map(function (c) {return c.toLowerCase();});
+    var vals = splitCsv(m[4]).map(parseLiteral);
+    if (cols.length!== vals.length) throw new Error("Column count does not match value count.");
+    cols.forEach(function (c) {if (table.columns.indexOf(c) === -1) throw new Error("Unknown column " + c);});
+    var row = {};
+    table.columns.forEach(function (c) {row[c] = null;});
+    cols.forEach(function (c, i) {row[c] = vals[i];});
+    if (row.id == null) row.id = table.rows.reduce(function (n, r) {return Math.max(n, Number(r.id) || 0);}, 0) + 1;
+    if (table.rows.some(function (r) {return r.id === row.id;})) throw new Error("Duplicate id " + row.id);
+    table.rows.push(row);
+    return "1 row inserted.";
+}
+  function runUpdate(db, sql) {
+    var m = sql.match(/^update\s+([a-z_][a-z0-9_]*)\s+set\s+([\s\S]+)$/i);
+    if (!m) throw new Error("Expected UPDATE table SET col = value");
+    var table = tableBy(db, m[1]);
+    var parts = splitKeyword(m[2], "where");
+    var changes = splitCsv(parts[0]).map(function (chunk) {
+      var am = chunk.match(/^([a-z_][a-z0-9_]*)\s*=\s*([\s\S]+)$/i);
+      if (!am) throw new Error("Bad assignment " + chunk);
+      var col = am[1].toLowerCase();
+      if (table.columns.indexOf(col) === -1) throw new Error("Unknown column " + col);
+      return {col: col, val: parseLiteral(am[2])};
+});
+    if (!changes.length) throw new Error("SET needs at least one column.");
+    var n = 0;
+    table.rows.forEach(function (row) {
+      if (!matchRow(row, parts[1])) return;
+      changes.forEach(function (ch) {row[ch.col] = ch.val;});
+      n += 1;
+});
+    return n + " row(s) updated.";
+}
+  function runDelete(db, sql) {
+    var m = sql.match(/^delete\s+from\s+([a-z_][a-z0-9_]*)\s*([\s\S]*)$/i);
+    if (!m) throw new Error("Expected DELETE FROM table");
+    var table = tableBy(db, m[1]);
+    var rest = m[2].trim();
+    var where = null;
+    if (rest) {
+      if (!/^where\b/i.test(rest)) throw new Error("Only a WHERE clause can follow the table name.");
+      where = rest.replace(/^where\s+/i, "");
+}
+    var keep = [];
+    var n = 0;
+    table.rows.forEach(function (row) {
+      if (matchRow(row, where)) n += 1;
+      else keep.push(row);
+});
+    table.rows = keep;
+    return n + " row(s) deleted.";
+}
+  function runAll(db, raw) {
+    if (!db) return "Select a database.";
+    if (db.status!== "available") return "Database is " + String(db.status).replace(/_/g, " ") + ". Start it before running SQL.";
+    var parts = stripComments(raw).split(";").map(function (s) {return s.trim();}).filter(Boolean);
+    if (!parts.length) return "Enter a statement.";
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var result = runOne(db, parts[i]);
+      out.push(result);
+      if (result.indexOf("Error:") === 0) break;
+}
+    return out.join("\n\n");
+}
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
+</body>
+</html>

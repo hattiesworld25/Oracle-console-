@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Oracle Cloud Clone — Console</title>
+<style>
+:root{
+  --bg:#0e1014; --panel:#151924; --panel2:#1b2130; --panel3:#222a3d;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --text:#ece9e2; --muted:#98a1b3; --faint:#6b7488;
+  --red:#c74634; --red2:#e85d48; --red-dim:rgba(199,70,52,.16);
+  --green:#3ecf8e; --green-dim:rgba(62,207,142,.14);
+  --amber:#f5c16c; --amber-dim:rgba(245,193,108,.14);
+  --blue:#6c8cff; --blue-dim:rgba(108,140,255,.14);
+  --radius:14px; --shadow:0 16px 44px rgba(0,0,0,.45);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text)}
+body{font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;font-size:14px;
+  background:radial-gradient(1000px 480px at 85% -10%,rgba(199,70,52,.14),transparent 60%),
+  radial-gradient(800px 420px at -10% 30%,rgba(108,140,255,.07),transparent 55%),var(--bg)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#2a3348;border-radius:99px}
+::-webkit-scrollbar-track{background:transparent}
+
+#app{display:flex;min-height:100vh}
+/* ---------- Sidebar ---------- */
+.sidebar{width:236px;flex:0 0 236px;background:rgba(13,15,20,.92);border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+.brand .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(140deg,var(--red2),var(--red));
+  display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff;box-shadow:0 6px 18px rgba(199,70,52,.4)}
+.brand b{font-size:15px;letter-spacing:-.02em}
+.brand small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+.nav{padding:6px 10px;overflow:auto;flex:1}
+.nav .grp{font-size:11px;letter-spacing:.1em;color:var(--faint);padding:12px 10px 6px;text-transform:uppercase}
+.nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;border:0;
+  padding:10px 12px;border-radius:10px;color:var(--muted);font-weight:600}
+.nav button .ic{width:20px;text-align:center;font-size:16px}
+.nav button:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav button.on{background:var(--red-dim);color:#ffb4a6;box-shadow:inset 2px 0 0 var(--red2)}
+.side-foot{padding:14px;border-top:1px solid var(--line);color:var(--faint);font-size:12px}
+/* ---------- Main / topbar ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:12px;padding:12px 22px;
+  background:rgba(14,16,20,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar .crumb{font-weight:800;font-size:17px;letter-spacing:-.02em}
+.topbar .crumb small{color:var(--muted);font-weight:400}
+.gsearch{flex:1;max-width:460px;position:relative}
+.gsearch input{width:100%;background:#0b0d12;border:1px solid var(--line);border-radius:999px;
+  padding:9px 14px 9px 38px;outline:none}
+.gsearch input:focus{border-color:rgba(232,93,72,.55)}
+.gsearch::before{content:"⌕";position:absolute;left:13px;top:7px;color:var(--muted);font-size:17px}
+.topbar .sp{flex:1}
+.region{background:#0b0d12;border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--muted)}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(140deg,#6c8cff,#c74634);
+  display:grid;place-items:center;font-weight:800;font-size:13px}
+/* ---------- Views ---------- */
+.view{padding:22px;max-width:1240px;width:100%;margin:0 auto;padding-bottom:calc(60px + var(--safe-b))}
+.viewhead{display:flex;align-items:center;gap:12px;margin:2px 0 16px}
+.viewhead h1{margin:0;font-size:24px;letter-spacing:-.03em}
+.viewhead p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.viewhead .sp{flex:1}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:10px;padding:9px 15px;font-weight:700}
+.btn:hover{background:var(--panel3)}
+.btn.primary{background:linear-gradient(180deg,var(--red2),var(--red));border:0;color:#fff;
+  box-shadow:0 8px 22px rgba(199,70,52,.35)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{background:transparent;border-color:rgba(232,93,72,.5);color:#ff9a8a}
+.btn.sm{padding:6px 11px;font-size:12px;border-radius:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.card .k{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.card .v{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:6px 0 2px}
+.card .s{font-size:12px;color:var(--faint)}
+.card .v .up{color:var(--green);font-size:14px}.card .v .dn{color:var(--red2);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;
+  margin-bottom:16px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 4px;font-size:16px;letter-spacing:-.02em}
+.panel .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+@media(max-width:960px){.grid2{grid-template-columns:1fr}}
+/* tables */
+.tblwrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+th{text-align:left;padding:11px 14px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(255,255,255,.02);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#c9d2e3}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:4px 11px}
+.badge i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.b-green{background:var(--green-dim);color:var(--green)}
+.b-amber{background:var(--amber-dim);color:var(--amber)}
+.b-red{background:rgba(232,93,72,.14);color:#ff9a8a}
+.b-blue{background:var(--blue-dim);color:#9db4ff}
+.b-gray{background:rgba(255,255,255,.06);color:var(--muted)}
+.rowact{display:flex;gap:6px;justify-content:flex-end}
+/* bars chart */
+.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:8px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.bar .col{width:70%;max-width:44px;border-radius:7px 7px 3px 3px;
+  background:linear-gradient(180deg,var(--red2),rgba(199,70,52,.35));transition:height .6s ease}
+.bar.alt .col{background:linear-gradient(180deg,#6c8cff,rgba(108,140,255,.3))}
+.bar span{font-size:11px;color:var(--faint)}
+.bar b{font-size:11px;color:var(--muted)}
+.legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+/* events */
+.ev{display:flex;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.ev:last-child{border-bottom:0}
+.ev .t{color:var(--faint);font-size:12px;white-space:nowrap;min-width:86px}
+.ev .m b{font-weight:700}
+/* modal */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.66);display:grid;place-items:center;padding:18px}
+.sheet{width:min(480px,100%);background:#171c28;border:1px solid var(--line2);border-radius:20px;
+  padding:24px;box-shadow:var(--shadow);max-height:90vh;overflow:auto}
+.sheet h2{margin:0 0 4px;font-size:19px;letter-spacing:-.02em}
+.sheet p{color:var(--muted);font-size:13px;margin:0 0 16px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
+.field input,.field select{width:100%;background:#0d1017;border:1px solid var(--line2);border-radius:10px;
+  padding:10px 12px;outline:none}
+.field input:focus,.field select:focus{border-color:rgba(232,93,72,.55)}
+.sheet .row{display:flex;gap:10px;margin-top:18px}
+.sheet .row .btn{flex:1;padding:12px}
+/* toast */
+#toasts{position:fixed;bottom:calc(18px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:80;
+  display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#221a16;border:1px solid rgba(245,193,108,.4);color:#ffd9a8;padding:11px 18px;
+  border-radius:999px;font-size:13px;font-weight:600;box-shadow:var(--shadow);animation:tin .25s ease}
+.toast.ok{background:#12241c;border-color:rgba(62,207,142,.45);color:#9df0c6}
+.toast.err{background:#2a1414;border-color:rgba(232,93,72,.5);color:#ffb4a6}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+.hide{display:none!important}
+.empty{padding:34px;text-align:center;color:var(--faint)}
+@media(max-width:860px){
+  .sidebar{position:fixed;left:0;transform:translateX(-100%);transition:transform .25s ease}
+  body.navopen .sidebar{transform:none}
+  .gsearch{display:none}
+  #menuBtn{display:inline-flex!important}
+}
+#menuBtn{display:none}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:19}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="mark">O</div><div><b>Oracle Cloud</b><small>clone &middot; console</small></div></div>
+    <nav class="nav" id="nav">
+      <div class="grp">Observe</div>
+      <button data-v="dash" class="on"><span class="ic">&#9783;</span>Dashboard</button>
+      <div class="grp">Infrastructure</div>
+      <button data-v="compute"><span class="ic">&#9881;</span>Compute &middot; Instances</button>
+      <button data-v="database"><span class="ic">&#128451;</span>Databases</button>
+      <button data-v="storage"><span class="ic">&#128451;</span>Object Storage</button>
+      <button data-v="network"><span class="ic">&#127760;</span>Networking &middot; VCNs</button>
+      <div class="grp">Governance</div>
+      <button data-v="billing"><span class="ic">&#128176;</span>Billing &middot; Costs</button>
+    </nav>
+    <div class="side-foot">Tenancy: <b style="color:var(--muted)">hattie-lab</b><br>Region: <b style="color:var(--muted)">us-ashburn-1</b></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="btn sm" id="menuBtn">&#9776;</button>
+      <div class="crumb" id="crumb">Dashboard <small>/ home</small></div>
+      <label class="gsearch"><input id="gq" placeholder="Search resources in this tenancy" /></label>
+      <div class="sp"></div>
+      <select class="region" id="region">
+        <option>us-ashburn-1</option><option>us-phoenix-1</option>
+        <option>eu-frankfurt-1</option><option>uk-london-1</option>
+      </select>
+      <div class="avatar">HW</div>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="toasts"></div>
+<script>
+/* ================= State ================= */
+const seed = {
+  instances:[
+    {id:"i-1",name:"web-prod-01",status:"RUNNING",shape:"VM.Standard.E5.Flex",ocpu:2,mem:16,ip:"129.146.12.44",created:"2026-09-28"},
+    {id:"i-2",name:"api-staging-02",status:"RUNNING",shape:"VM.Standard.E4.Flex",ocpu:4,mem:32,ip:"129.146.88.10",created:"2026-10-02"},
+    {id:"i-3",name:"ml-train-gpu",status:"STOPPED",shape:"VM.GPU.A10.1",ocpu:8,mem:64,ip:"—",created:"2026-10-05"},
+    {id:"i-4",name:"bastion-ashburn",status:"RUNNING",shape:"VM.Standard.E2.1.Micro",ocpu:1,mem:1,ip:"129.146.200.7",created:"2026-08-14"}
+  ],
+  databases:[
+    {id:"d-1",name:"orders-db",workload:"Transaction Processing",status:"AVAILABLE",ocpu:2,storage:"1 TB",created:"2026-09-19"},
+    {id:"d-2",name:"analytics-dw",workload:"Data Warehouse",status:"AVAILABLE",ocpu:4,storage:"4 TB",created:"2026-09-30"},
+    {id:"d-3",name:"dev-sandbox",workload:"Transaction Processing",status:"STOPPED",ocpu:1,storage:"500 GB",created:"2026-10-08"}
+  ],
+  buckets:[
+    {id:"b-1",name:"app-assets",vis:"Private",objects:1284,size:"46.2 GB",created:"2026-09-12"},
+    {id:"b-2",name:"db-backups",vis:"Private",objects:96,size:"812 GB",created:"2026-09-20"},
+    {id:"b-3",name:"public-cdn",vis:"Public",objects:312,size:"18.7 GB",created:"2026-10-01"}
+  ],
+  vcns:[
+    {id:"v-1",name:"prod-vcn",cidr:"10.0.0.0/16",subnets:6,state:"AVAILABLE",created:"2026-09-10"},
+    {id:"v-2",name:"dev-vcn",cidr:"10.1.0.0/16",subnets:3,state:"AVAILABLE",created:"2026-09-25"}
+  ],
+  spend:[182,204,176,231,249,218,264],
+  spendLabels:["Apr","May","Jun","Jul","Aug","Sep","Oct"],
+  events:[
+    {t:"09:41",m:"<b>api-staging-02</b> scaled from 2 to 4 OCPUs"},
+    {t:"08:15",m:"Autonomous backup completed for <b>orders-db</b>"},
+    {t:"Yesterday",m:"Bucket <b>db-backups</b> lifecycle rule archived 12 GB"},
+    {t:"Yesterday",m:"<b>ml-train-gpu</b> stopped by hattie (cost save)"},
+    {t:"Oct 8",m:"VCN <b>dev-vcn</b> route table updated"}
+  ]
+};
+let S;
+try{ S = JSON.parse(localStorage.getItem("occ_state")||"null") || structuredClone(seed); }
+catch(e){ S = structuredClone(seed); }
+function save(){ try{localStorage.setItem("occ_state",JSON.stringify(S));}catch(e){} }
+let cur="dash", gq="";
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(msg,kind){const el=document.createElement("div");el.className="toast"+(kind?" "+kind:"");
+  el.textContent=msg;$("toasts").appendChild(el);setTimeout(()=>el.remove(),2600);}
+function badge(st){
+  const map={RUNNING:"b-green",AVAILABLE:"b-green",STOPPED:"b-amber",TERMINATED:"b-red",
+    PROVISIONING:"b-blue",Private:"b-gray",Public:"b-blue"};
+  return `<span class="badge ${map[st]||"b-gray"}"><i></i>${esc(st)}</span>`;
+}
+const money=n=>"$"+n.toLocaleString("en-US",{maximumFractionDigits:0});
+
+/* ================= Modal ================= */
+function openModal(title,sub,fieldsHtml,onOk,okLabel){
+  const root=$("modalRoot");
+  root.innerHTML=`<div class="overlay" id="ovl"><div class="sheet">
+    <h2>${esc(title)}</h2><p>${esc(sub)}</p>
+    ${fieldsHtml}
+    <div class="row"><button class="btn" id="mCancel">Cancel</button>
+    <button class="btn primary" id="mOk">${esc(okLabel||"Create")}</button></div></div></div>`;
+  $("mCancel").onclick=()=>root.innerHTML="";
+  $("ovl").addEventListener("click",e=>{if(e.target.id==="ovl")root.innerHTML="";});
+  $("mOk").onclick=()=>{
+    const vals={};
+    root.querySelectorAll("[data-f]").forEach(el=>vals[el.dataset.f]=el.value.trim());
+    onOk(vals);
+  };
+}
+const fld=(f,label,inner)=>`<div class="field"><label>${esc(label)}</label>${inner.replace("__F__",f)}</div>`;
+const txt=f=>`<input data-f="__F__" />`;
+const sel=(f,opts)=>`<select data-f="__F__">${opts.map(o=>`<option>${esc(o)}</option>`).join("")}</select>`;
+
+/* ================= Router ================= */
+const TITLES={dash:["Dashboard","<small>/ home</small>"],compute:["Compute","<small>/ instances</small>"],
+  database:["Databases","<small>/ autonomous</small>"],storage:["Object Storage","<small>/ buckets</small>"],
+  network:["Networking","<small>/ virtual cloud networks</small>"],billing:["Billing","<small>/ cost analysis</small>"]};
+function nav(v){
+  cur=v;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  $("crumb").innerHTML=TITLES[v][0]+" "+TITLES[v][1];
+  document.body.classList.remove("navopen");
+  ({dash:vDash,compute:vCompute,database:vDb,storage:vStore,network:vNet,billing:vBill}[v])();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>nav(b.dataset.v));
+$("gq").oninput=e=>{gq=e.target.value.trim().toLowerCase();nav(cur);};
+$("region").onchange=e=>toast("Region switched to "+e.target.value+" (demo)","ok");
+$("menuBtn").onclick=()=>{
+  const open=document.body.classList.toggle("navopen");
+  if(open){const s=document.createElement("div");s.className="scrim";s.id="scrim";
+    s.onclick=()=>{document.body.classList.remove("navopen");s.remove();};
+    document.body.appendChild(s);}
+  else{const s=$("scrim");if(s)s.remove();}
+};
+function filt(rows,keys){ if(!gq)return rows;
+  return rows.filter(r=>keys.some(k=>String(r[k]).toLowerCase().includes(gq))); }
+
+/* ================= Dashboard ================= */
+function vDash(){
+  const running=S.instances.filter(i=>i.status==="RUNNING").length;
+  const dbs=S.databases.filter(d=>d.status==="AVAILABLE").length;
+  const objs=S.buckets.reduce((n,b)=>n+b.objects,0);
+  const thisMo=S.spend[S.spend.length-1], lastMo=S.spend[S.spend.length-2];
+  const d=thisMo-lastMo, max=Math.max(...S.spend);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Good morning, Hattie</h1><p>Here's what's happening in <b>hattie-lab</b> today.</p></div></div>
+  <div class="cards">
+    <div class="card"><div class="k">Running instances</div><div class="v">${running}<span class="s"> / ${S.instances.length}</span></div><div class="s">across 2 availability domains</div></div>
+    <div class="card"><div class="k">Databases available</div><div class="v">${dbs}<span class="s"> / ${S.databases.length}</span></div><div class="s">autonomous, self-tuning</div></div>
+    <div class="card"><div class="k">Stored objects</div><div class="v">${objs.toLocaleString()}</div><div class="s">in ${S.buckets.length} buckets</div></div>
+    <div class="card"><div class="k">October spend</div><div class="v">${money(thisMo)} <span class="${d<=0?"up":"dn"}">${d<=0?"▼":"▲"} ${money(Math.abs(d))}</span></div><div class="s">vs September</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Monthly spend</h3><p class="sub">Last 7 months, all services</p>
+      <div class="bars">${S.spend.map((v,i)=>`<div class="bar"><b>${money(v)}</b><div class="col" style="height:${Math.round(v/max*130)}px"></div><span>${S.spendLabels[i]}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>Recent events</h3><p class="sub">Across the tenancy</p>
+      ${S.events.slice(0,5).map(e=>`<div class="ev"><span class="t">${esc(e.t)}</span><span class="m">${e.m}</span></div>`).join("")}
+    </div>
+  </div>
+  <div class="panel"><h3>Quick actions</h3><p class="sub">Spin something up</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn primary" onclick="nav('compute')">+ Launch instance</button>
+      <button class="btn" onclick="nav('database')">+ Create database</button>
+      <button class="btn" onclick="nav('storage')">+ New bucket</button>
+    </div></div>`;
+}
+/* ================= Compute ================= */
+function vCompute(){
+  const rows=filt(S.instances,["name","shape","status","ip"]);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Instances</h1><p>${S.instances.length} instances in us-ashburn-1</p></div>
+    <div class="sp"></div><button class="btn primary" id="mkI">+ Create instance</button></div>
+  <div class="panel" style="padding:0"><div class="tblwrap"><table>
+    <thead><tr><th>Name</th><th>Status</th><th>Shape</th><th>OCPU / Mem</th><th>Public IP</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
+    <tbody>${rows.map(i=>`<tr>
+      <td><b>${esc(i.name)}</b><br><span class="mono">${i.id}</span></td>
+      <td>${badge(i.status)}</td><td class="mono">${esc(i.shape)}</td>
+      <td>${i.ocpu} / ${i.mem} GB</td><td class="mono">${esc(i.ip)}</td><td>${esc(i.created)}</td>
+      <td><div class="rowact">
+        ${i.status==="RUNNING"
+          ?`<button class="btn sm" onclick="iAct('${i.id}','STOPPED')">Stop</button><button class="btn sm" onclick="iAct('${i.id}','REBOOT')">Reboot</button>`
+          :i.status==="STOPPED"?`<button class="btn sm" onclick="iAct('${i.id}','RUNNING')">Start</button>`:""}
+        ${i.status!=="TERMINATED"?`<button class="btn sm danger" onclick="iKill('${i.id}')">Terminate</button>`:""}
+      </div></td></tr>`).join("")||`<tr><td colspan="7"><div class="empty">No instances match your search.</div></td></tr>`}
+    </tbody></table></div></div>`;
+  $("mkI").onclick=()=>openModal("Create instance","Billed per OCPU-hour. Stopped instances cost nothing.",
+    fld("name","Display name",txt("__F__"))+
+    fld("shape","Shape",sel("__F__",["VM.Standard.E5.Flex","VM.Standard.E4.Flex","VM.Standard.E2.1.Micro","VM.GPU.A10.1"]))+
+    fld("ocpu","OCPUs",sel("__F__",["1","2","4","8"])),
+    v=>{ if(!v.name){toast("Give the instance a name","err");return;}
+      const oc=+v.ocpu;
+      S.instances.push({id:"i-"+Date.now(),name:v.name,status:"PROVISIONING",shape:v.shape,ocpu:oc,
+        mem:oc*8,ip:"assigning…",created:new Date().toISOString().slice(0,10)});
+      pushEv(`<b>${esc(v.name)}</b> provisioning started`); save(); $("modalRoot").innerHTML=""; nav("compute");
+      toast("Instance provisioning…","ok");
+      setTimeout(()=>{const x=S.instances.find(i=>i.name===v.name&&i.status==="PROVISIONING");
+        if(x){x.status="RUNNING";x.ip="129.146."+Math.floor(Math.random()*200+1)+"."+Math.floor(Math.random()*200+1);
+          pushEv(`<b>${esc(v.name)}</b> is now RUNNING`);save();if(cur==="compute")nav("compute");}},2500);
+    });
+}
+function iAct(id,to){
+  const i=S.instances.find(x=>x.id===id); if(!i)return;
+  if(to==="REBOOT"){toast(i.name+" rebooting…");pushEv(`<b>${esc(i.name)}</b> rebooted`);}
+  else{i.status=to;pushEv(`<b>${esc(i.name)}</b> ${to==="RUNNING"?"started":"stopped"}`);
+    toast(i.name+(to==="RUNNING"?" started":" stopped"),"ok");}
+  save();nav("compute");
+}
+function iKill(id){
+  const i=S.instances.find(x=>x.id===id); if(!i)return;
+  openModal("Terminate "+i.name+"?","This permanently deletes the instance and its boot volume. This cannot be undone.","",
+    ()=>{i.status="TERMINATED";i.ip="—";pushEv(`<b>${esc(i.name)}</b> terminated`);
+      save();$("modalRoot").innerHTML="";nav("compute");toast("Instance terminated");},"Terminate");
+}
+function pushEv(m){S.events.unshift({t:new Date().toTimeString().slice(0,5),m});S.events=S.events.slice(0,12);}
+
+/* ================= Database ================= */
+function vDb(){
+  const rows=filt(S.databases,["name","workload","status"]);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Autonomous Databases</h1><p>Self-driving, self-securing, self-repairing</p></div>
+    <div class="sp"></div><button class="btn primary" id="mkD">+ Create database</button></div>
+  <div class="panel" style="padding:0"><div class="tblwrap"><table>
+    <thead><tr><th>Name</th><th>Status</th><th>Workload</th><th>OCPU</th><th>Storage</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
+    <tbody>${rows.map(d=>`<tr>
+      <td><b>${esc(d.name)}</b><br><span class="mono">${d.id}</span></td>
+      <td>${badge(d.status)}</td><td>${esc(d.workload)}</td><td>${d.ocpu}</td><td>${esc(d.storage)}</td><td>${esc(d.created)}</td>
+      <td><div class="rowact">
+        ${d.status==="AVAILABLE"?`<button class="btn sm" onclick="dAct('${d.id}')">Stop</button>`
+          :`<button class="btn sm" onclick="dAct('${d.id}')">Start</button>`}
+      </div></td></tr>`).join("")||`<tr><td colspan="7"><div class="empty">No databases match your search.</div></td></tr>`}
+    </tbody></table></div></div>`;
+  $("mkD").onclick=()=>openModal("Create autonomous database","Always-free tier eligible. Pay only for OCPUs used.",
+    fld("name","Display name",txt("__F__"))+
+    fld("workload","Workload type",sel("__F__",["Transaction Processing","Data Warehouse","JSON","APEX"]))+
+    fld("ocpu","OCPUs",sel("__F__",["1","2","4"])),
+    v=>{ if(!v.name){toast("Give the database a name","err");return;}
+      S.databases.push({id:"d-"+Date.now(),name:v.name,workload:v.workload,status:"PROVISIONING",
+        ocpu:+v.ocpu,storage:"1 TB",created:new Date().toISOString().slice(0,10)});
+      pushEv(`Database <b>${esc(v.name)}</b> provisioning`);save();$("modalRoot").innerHTML="";nav("database");
+      setTimeout(()=>{const x=S.databases.find(d=>d.name===v.name&&d.status==="PROVISIONING");
+        if(x){x.status="AVAILABLE";pushEv(`Database <b>${esc(v.name)}</b> is AVAILABLE`);save();
+          if(cur==="database")nav("database");toast("Database available","ok");}},2500);
+    });
+}
+function dAct(id){const d=S.databases.find(x=>x.id===id);if(!d)return;
+  d.status=d.status==="AVAILABLE"?"STOPPED":"AVAILABLE";
+  pushEv(`Database <b>${esc(d.name)}</b> ${d.status==="AVAILABLE"?"started":"stopped"}`);
+  save();nav("database");toast("Database "+d.status.toLowerCase(),"ok");}
+
+/* ================= Storage ================= */
+function vStore(){
+  const rows=filt(S.buckets,["name","vis"]);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Buckets</h1><p>${S.buckets.length} buckets · object storage</p></div>
+    <div class="sp"></div><button class="btn primary" id="mkB">+ Create bucket</button></div>
+  <div class="panel" style="padding:0"><div class="tblwrap"><table>
+    <thead><tr><th>Name</th><th>Visibility</th><th>Objects</th><th>Size</th><th>Created</th></tr></thead>
+    <tbody>${rows.map(b=>`<tr>
+      <td><b>${esc(b.name)}</b><br><span class="mono">${b.id}</span></td>
+      <td>${badge(b.vis)}</td><td>${b.objects.toLocaleString()}</td><td>${esc(b.size)}</td><td>${esc(b.created)}</td>
+      </tr>`).join("")||`<tr><td colspan="5"><div class="empty">No buckets match your search.</div></td></tr>`}
+    </tbody></table></div></div>`;
+  $("mkB").onclick=()=>openModal("Create bucket","S3-compatible API. 10 GB free every month.",
+    fld("name","Bucket name",txt("__F__"))+
+    fld("vis","Visibility",sel("__F__",["Private","Public"])),
+    v=>{ if(!v.name){toast("Give the bucket a name","err");return;}
+      S.buckets.push({id:"b-"+Date.now(),name:v.name.toLowerCase().replace(/\s+/g,"-"),vis:v.vis,
+        objects:0,size:"0 B",created:new Date().toISOString().slice(0,10)});
+      pushEv(`Bucket <b>${esc(v.name)}</b> created`);save();$("modalRoot").innerHTML="";nav("storage");
+      toast("Bucket created","ok");});
+}
+
+/* ================= Networking ================= */
+function vNet(){
+  const rows=filt(S.vcns,["name","cidr","state"]);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Virtual Cloud Networks</h1><p>Isolated networks for your resources</p></div>
+    <div class="sp"></div><button class="btn primary" id="mkV">+ Create VCN</button></div>
+  <div class="panel" style="padding:0"><div class="tblwrap"><table>
+    <thead><tr><th>Name</th><th>State</th><th>IPv4 CIDR</th><th>Subnets</th><th>Created</th></tr></thead>
+    <tbody>${rows.map(v=>`<tr>
+      <td><b>${esc(v.name)}</b><br><span class="mono">${v.id}</span></td>
+      <td>${badge(v.state)}</td><td class="mono">${esc(v.cidr)}</td><td>${v.subnets}</td><td>${esc(v.created)}</td>
+      </tr>`).join("")||`<tr><td colspan="5"><div class="empty">No VCNs match your search.</div></td></tr>`}
+    </tbody></table></div></div>
+  <div class="panel"><h3>Network diagram</h3><p class="sub">prod-vcn at a glance</p>
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap">
+      ${["Internet Gateway","Public subnet<br><span class='mono'>10.0.1.0/24</span>","Load Balancer","Private subnet<br><span class='mono'>10.0.2.0/24</span>","web-prod-01"].map((n,i,a)=>
+        `<div style="background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:12px 16px;text-align:center;font-size:12px;font-weight:700">${n}</div>${i<a.length-1?'<div style="color:var(--red2);font-size:20px;padding:0 8px">→</div>':""}`).join("")}
+    </div></div>`;
+  $("mkV").onclick=()=>openModal("Create VCN","Includes an internet gateway and one public subnet by default.",
+    fld("name","VCN name",txt("__F__"))+fld("cidr","IPv4 CIDR block",txt("__F__")),
+    v=>{ const cidr=v.cidr||"10."+Math.floor(Math.random()*200+2)+".0.0/16";
+      if(!v.name){toast("Give the VCN a name","err");return;}
+      if(!/^\d+\.\d+\.\d+\.\d+\/\d+$/.test(cidr)){toast("CIDR looks invalid — try 10.2.0.0/16","err");return;}
+      S.vcns.push({id:"v-"+Date.now(),name:v.name,state:"AVAILABLE",cidr,subnets:1,
+        created:new Date().toISOString().slice(0,10)});
+      pushEv(`VCN <b>${esc(v.name)}</b> created`);save();$("modalRoot").innerHTML="";nav("network");
+      toast("VCN created","ok");});
+}
+
+/* ================= Billing ================= */
+function vBill(){
+  const total=S.spend.reduce((a,b)=>a+b,0);
+  const by=[["Compute",38],["Database",27],["Storage",12],["Networking",9],["Support",14]];
+  const max=Math.max(...S.spend);
+  $("view").innerHTML=`
+  <div class="viewhead"><div><h1>Cost Analysis</h1><p>Tenancy-wide spend, updated hourly</p></div></div>
+  <div class="cards">
+    <div class="card"><div class="k">October forecast</div><div class="v">${money(289)}</div><div class="s">based on current burn rate</div></div>
+    <div class="card"><div class="k">Month to date</div><div class="v">${money(S.spend[S.spend.length-1])}</div><div class="s">11 days elapsed</div></div>
+    <div class="card"><div class="k">7-month total</div><div class="v">${money(total)}</div><div class="s">Apr – Oct 2026</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Spend trend</h3><p class="sub">Monthly, all services</p>
+      <div class="bars">${S.spend.map((v,i)=>`<div class="bar alt"><b>${money(v)}</b><div class="col" style="height:${Math.round(v/max*130)}px"></div><span>${S.spendLabels[i]}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>By service — October</h3><p class="sub">Share of this month's bill</p>
+      ${by.map(([n,p])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>${n}</span><b>${p}%</b></div>
+        <div class="progress" style="height:8px"><b style="width:${p}%"></b></div></div>`).join("")}
+      <div class="legend"><span><span class="dot" style="background:var(--red2)"></span>Paid services</span>
+      <span><span class="dot" style="background:var(--green)"></span>Always-free tier active</span></div>
+    </div>
+  </div>`;
+}
+
+/* ================= Init ================= */
+nav("dash");
+</script>
+</body>
+</html>

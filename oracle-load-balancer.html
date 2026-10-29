@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Console — Load Balancers</title>
+<style>
+:root{--red:#c74634;--ink:#161513;--muted:#6b6560;--line:#e6e2dc;--bg:#f6f5f3;--ok:#1b7a4a;--ok-bg:#e7f6ee;--stop:#8a3a32;--stop-bg:#fdecea;--warn:#9a6700;--warn-bg:#fff6e0;--blue:#1f4e8c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-rows:56px 1fr;grid-template-columns:228px 1fr;grid-template-areas:"top top" "side main"}
+header{grid-area:top;background:#1c1917;color:#fff;display:flex;align-items:center;gap:18px;padding:0 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.mark{width:28px;height:28px;border-radius:7px;background:#c74634;display:grid;place-items:center;font-weight:800;font-size:12px}
+.crumb{color:#c8c2bb;font-size:13px}.crumb b{color:#fff}.hdr-sp,.sp{flex:1}
+.region,.avatar{background:#2c2826;border:1px solid #3d3835;color:#eee;border-radius:8px;padding:6px 10px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+aside{grid-area:side;background:#fff;border-right:1px solid var(--line);padding:14px 10px}
+.nav-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 6px}
+.nav-btn{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.nav-btn.active,.nav-btn:hover{background:#f4efe9}.nav-btn.active{font-weight:600;box-shadow:inset 3px 0 0 var(--red)}
+main{grid-area:main;overflow:auto;padding:22px 28px 48px}
+h1{font-size:22px;margin:0 0 4px}h3{margin:0 0 8px}.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,select,input{font:inherit}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13.5px}
+.btn.primary{background:var(--red);border-color:#a33a2b;color:#fff}.btn.danger{color:var(--stop)}
+input,select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:10px}.stat{padding:14px 16px}
+.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:700}.panel{overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--muted);padding:10px 14px;background:#faf9f7}
+td{padding:12px 14px;border-top:1px solid #f0ece7}
+tr.click:hover td{background:#fbf8f5;cursor:pointer}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.stop{background:var(--stop-bg);color:var(--stop)}.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.linkish{color:var(--blue);font-weight:600;cursor:pointer}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 16px}
+.tab{border:0;background:transparent;padding:10px 12px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--ink);border-bottom:2px solid var(--red)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:8px 12px;font-size:13.5px}.kv span{color:var(--muted)}
+.pad{padding:16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-bg{position:fixed;inset:0;background:rgba(22,21,19,.45);display:none;place-items:center;z-index:20;padding:16px}
+.modal-bg.show{display:grid}.modal{width:min(640px,100%);background:#fff;border-radius:14px}
+.modal-h,.modal-f{padding:16px 18px;display:flex;align-items:center;gap:10px}
+.modal-h{border-bottom:1px solid var(--line)}.modal-f{border-top:1px solid var(--line);justify-content:flex-end}
+.modal-b{padding:16px 18px;display:grid;gap:12px}label{font-size:12.5px;font-weight:600;display:grid;gap:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;bottom:18px;right:18px;background:#1c1917;color:#fff;padding:12px 14px;border-radius:10px;display:none;z-index:30}
+.toast.show{display:block}.empty{padding:28px;text-align:center;color:var(--muted)}
+.badge{font-size:11px;background:#f4efe9;border-radius:6px;padding:2px 6px}
+.bar{height:8px;background:#f0ece7;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#c74634}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-areas:"top" "main"}aside{display:none}.cards,.grid2,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">LB</div> Cloud Console</div>
+  <div class="crumb">Networking / <b>Load Balancers</b></div>
+  <div class="hdr-sp"></div>
+  <div class="region" id="regionLabel">us-ashburn-1</div>
+  <div class="avatar">AL</div>
+</header>
+<aside>
+  <div class="nav-label">Networking</div>
+  <button class="nav-btn active" data-view="list">Load Balancers</button>
+  <button class="nav-btn" data-view="certs">Certificates</button>
+  <button class="nav-btn" data-view="logs">Access logs</button>
+</aside>
+<main id="app"></main>
+<div class="modal-bg" id="modal"></div>
+<div class="toast" id="toast"></div>
+<script>
+const REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1"];
+const state = {view: "list", region: "us-ashburn-1", selected: null, tab: "overview", lbs: [], certs: [], logs: []};
+function nid(p) {return p + Math.random().toString(36).slice(2, 10);}
+function now() {return new Date().toISOString();}
+function $(s) {return document.querySelector(s);}
+function esc(s) {return String(s?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));}
+function fmt(iso) {return new Date(iso).toLocaleString(undefined, {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"});}
+function pill(status) {
+  const cls = /active|ok|healthy/i.test(status)? "ok": /critical|offline|failed/i.test(status)? "stop": "warn";
+  return `<span class="pill ${cls}"><span class="dot"></span>${esc(status)}</span>`;
+}
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function ip() {return "10.0.1." + (20 + Math.floor(Math.random() * 180));}
+
+function seed() {
+  const cert = {id: nid("cert-"), name: "app-example", cn: "app.example.com", expires: "2027-04-12", region: state.region};
+  state.certs.push(cert);
+  const lb = makeLb("public-web", "Public", "Flexible", 10, 100);
+  lb.listeners.push({id: nid("lsn-"), name: "https-443", protocol: "HTTPS", port: 443, backend: "app-pool", cert: cert.name});
+  lb.listeners.push({id: nid("lsn-"), name: "http-80", protocol: "HTTP", port: 80, backend: "app-pool", cert: ""});
+  lb.backends.push(be("web-1", 80, "OK"), be("web-2", 80, "OK"), be("web-3", 80, "Critical"));
+  state.lbs.push(lb);
+  state.logs.push(logLine(lb, 200, "/"), logLine(lb, 200, "/health"), logLine(lb, 404, "/missing"));
+}
+function be(name, port, health) {return {id: nid("be-"), name, ip: ip(), port, weight: 1, drain: false, health};}
+function makeLb(name, vis, shape, min, max) {
+  return {id: nid("ocid1.loadbalancer."), name, visibility: vis, shape, min, max, status: "Active", region: state.region, compartment: "prod-apps", ip: vis === "Public"? "129.146." + (10 + Math.floor(Math.random() *80)) + "." + (10 + Math.floor(Math.random()* 200)): ip(), created: now(), listeners: [], backends: [], requests: 1200 + Math.floor(Math.random() * 4000)};
+}
+function logLine(lb, code, path) {return {id: nid("log-"), lb: lb.name, when: now(), code, path, ip: "203.0.113." + (1 + Math.floor(Math.random() * 200)), region: lb.region};}
+seed();
+
+function render() {
+  $("#regionLabel").textContent = state.region;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === (state.view === "detail"? "list": state.view)));
+  const views = {list: viewList, detail: viewDetail, certs: viewCerts, logs: viewLogs};
+  $("#app").innerHTML = views[state.view]();
+  bind();
+}
+function table(heads, rows, empty) {
+  return `<div class="panel"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td class="empty" colspan="${heads.length}">${empty}</td></tr>`}</tbody></table></div>`;
+}
+function viewList() {
+  const list = state.lbs.filter(l => l.region === state.region);
+  const rows = list.map(l => `<tr class="click" data-open="${l.id}"><td class="linkish">${esc(l.name)}<div class="mono">${l.ip}</div></td><td>${pill(l.status)}</td><td>${l.visibility}</td><td>${l.shape} ${l.min}-${l.max} Mbps</td><td>${l.backends.filter(b => b.health === "OK" &&!b.drain).length}/${l.backends.length}</td><td>${l.compartment}</td></tr>`).join("");
+  return `<div class="row"><div><h1>Load balancers</h1><p class="sub">Simulated traffic distribution in ${state.region}. No packets leave this page.</p></div><div class="sp"></div><select id="region">${REGIONS.map(r => `<option ${r === state.region? "selected": ""}>${r}</option>`).join("")}</select><button class="btn primary" id="create">Create load balancer</button></div>
+    <div class="cards"><div class="stat"><div class="k">Load balancers</div><div class="v">${list.length}</div></div><div class="stat"><div class="k">Listeners</div><div class="v">${list.reduce((a, l) => a + l.listeners.length, 0)}</div></div><div class="stat"><div class="k">Healthy backends</div><div class="v">${list.reduce((a, l) => a + l.backends.filter(b => b.health === "OK").length, 0)}</div></div><div class="stat"><div class="k">Requests today</div><div class="v">${list.reduce((a, l) => a + l.requests, 0)}</div></div></div>
+    ${table(["Name", "State", "Visibility", "Shape", "Healthy", "Compartment"], rows, "No load balancers in this region.")}`;
+}
+function viewDetail() {
+  const l = state.lbs.find(x => x.id === state.selected);
+  if (!l) {state.view = "list"; return viewList();}
+  const tabs = ["overview", "listeners", "backends"].map(t => `<button class="tab ${state.tab === t? "on": ""}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("");
+  return `<div class="row"><button class="btn" id="back">← Load balancers</button><div><h1 style="margin:0">${esc(l.name)}</h1><p class="sub" style="margin:2px 0 0">${l.ip}</p></div><div class="sp"></div>${pill(l.status)}<button class="btn danger" id="del">Delete</button></div><div class="tabs">${tabs}</div>${detail(l)}`;
+}
+function detail(l) {
+  if (state.tab === "overview") return `<div class="grid2"><div class="panel pad"><div class="kv"><span>OCID</span><div class="mono">${l.id}</div><span>Visibility</span><div>${l.visibility}</div><span>Shape</span><div>${l.shape}</div><span>Bandwidth</span><div>${l.min}–${l.max} Mbps</div><span>Compartment</span><div>${l.compartment}</div><span>Created</span><div>${fmt(l.created)}</div></div></div><div class="panel pad"><div class="k">Bandwidth used</div><div class="v">${Math.min(l.max, Math.round(l.requests / 80))} Mbps</div><div class="bar"><i style="width:${Math.min(100, (l.requests / 80) / l.max * 100)}%"></i></div><p class="sub">${l.requests.toLocaleString()} requests recorded in this session.</p><button class="btn" id="hit">Send test request</button></div></div>`;
+  if (state.tab === "listeners") {
+    const rows = l.listeners.map(n => `<tr><td>${esc(n.name)}</td><td>${n.protocol}</td><td>${n.port}</td><td>${esc(n.backend)}</td><td>${esc(n.cert || "—")}</td><td><button class="btn danger" data-rm-lsn="${n.id}">Remove</button></td></tr>`).join("");
+    return `<div class="row" style="margin-bottom:10px"><div class="sp"></div><button class="btn primary" id="addLsn">Add listener</button></div>${table(["Name", "Protocol", "Port", "Backend set", "Certificate", ""], rows, "No listeners.")}`;
+}
+  const rows = l.backends.map(b => `<tr><td>${esc(b.name)}</td><td class="mono">${b.ip}:${b.port}</td><td>${b.weight}</td><td>${b.drain? "Draining": "In service"}</td><td>${pill(b.health)}</td><td><button class="btn" data-drain="${b.id}">${b.drain? "Enable": "Drain"}</button> <button class="btn danger" data-rm-be="${b.id}">Remove</button></td></tr>`).join("");
+  return `<div class="row" style="margin-bottom:10px"><div class="sp"></div><button class="btn" id="check">Run health check</button><button class="btn primary" id="addBe">Add backend</button></div>${table(["Name", "Address", "Weight", "Service", "Health", ""], rows, "No backends.")}`;
+}
+function viewCerts() {
+  const rows = state.certs.filter(c => c.region === state.region).map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.cn)}</td><td>${c.expires}</td><td><button class="btn danger" data-rm-cert="${c.id}">Delete</button></td></tr>`).join("");
+  return `<div class="row"><div><h1>Certificates</h1><p class="sub">Names only. This page does not store private keys.</p></div><div class="sp"></div><button class="btn primary" id="addCert">Add certificate</button></div>${table(["Name", "Common name", "Expires", ""], rows, "No certificates.")}`;
+}
+function viewLogs() {
+  const rows = state.logs.filter(l => l.region === state.region).map(l => `<tr><td>${fmt(l.when)}</td><td>${esc(l.lb)}</td><td class="mono">${l.ip}</td><td>${esc(l.path)}</td><td>${l.code}</td></tr>`).join("");
+  return `<h1>Access logs</h1><p class="sub">Sample lines generated in the browser.</p>${table(["Time", "Load balancer", "Client", "Path", "Status"], rows, "No log lines.")}`;
+}
+function openModal(body, onGo) {
+  $("#modal").classList.add("show");
+  $("#modal").innerHTML = `<div class="modal">${body}</div>`;
+  $("#x").onclick = $("#cancel").onclick = close;
+  $("#go").onclick = onGo;
+}
+function close() {$("#modal").classList.remove("show"); $("#modal").innerHTML = "";}
+function shell(title, fields) {
+  return `<div class="modal-h"><h2>${title}</h2><div class="sp"></div><button class="btn" id="x">Close</button></div><div class="modal-b">${fields}</div><div class="modal-f"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="go">Create</button></div>`;
+}
+function bind() {
+  if ($("#region")) $("#region").onchange = e => {state.region = e.target.value; render();};
+  if ($("#create")) $("#create").onclick = () => openModal(shell("Create load balancer", `<label>Name<input id="n" value="api-lb"></label><div class="two"><label>Visibility<select id="vis"><option>Public</option><option>Private</option></select></label><label>Shape<select id="shape"><option>Flexible</option><option>100Mbps</option></select></label></div><div class="two"><label>Min Mbps<input id="min" type="number" value="10"></label><label>Max Mbps<input id="max" type="number" value="100"></label></div>`), () => {
+    const name = $("#n").value.trim().toLowerCase();
+    if (!/^[a-z][a-z0-9-]{1,28}$/.test(name)) return toast("Name must start with a letter.");
+    const lb = makeLb(name, $("#vis").value, $("#shape").value, +$("#min").value || 10, +$("#max").value || 100);
+    lb.status = "Provisioning";
+    state.lbs.unshift(lb); close(); render();
+    setTimeout(() => {lb.status = "Active"; toast(name + " is Active"); render();}, 800);
+});
+  document.querySelectorAll("[data-open]").forEach(el => el.onclick = () => {state.selected = el.dataset.open; state.view = "detail"; state.tab = "overview"; render();});
+  document.querySelectorAll("[data-tab]").forEach(el => el.onclick = () => {state.tab = el.dataset.tab; render();});
+  if ($("#back")) $("#back").onclick = () => {state.view = "list"; render();};
+  const lb = state.lbs.find(x => x.id === state.selected);
+  if ($("#del") && lb) $("#del").onclick = () => {if (!confirm("Delete " + lb.name + "?")) return; state.lbs = state.lbs.filter(x => x.id!== lb.id); state.view = "list"; toast("Deleted"); render();};
+  if ($("#hit") && lb) $("#hit").onclick = () => {lb.requests += 1; state.logs.unshift(logLine(lb, 200, "/api/ping")); toast("200 from " + lb.ip); render();};
+  if ($("#addLsn") && lb) $("#addLsn").onclick = () => openModal(shell("Add listener", `<label>Name<input id="n" value="http-8080"></label><div class="two"><label>Protocol<select id="p"><option>HTTP</option><option>HTTPS</option><option>TCP</option></select></label><label>Port<input id="port" type="number" value="8080"></label></div>`), () => {
+    const port = +$("#port").value;
+    if (port < 1 || port > 65535) return toast("Port must be 1–65535.");
+    if (lb.listeners.some(n => n.port === port)) return toast("That port is already used.");
+    lb.listeners.push({id: nid("lsn-"), name: $("#n").value.trim() || "listener", protocol: $("#p").value, port, backend: "app-pool", cert: ""});
+    close(); render();
+});
+  document.querySelectorAll("[data-rm-lsn]").forEach(el => el.onclick = () => {lb.listeners = lb.listeners.filter(n => n.id!== el.dataset.rmLsn); render();});
+  if ($("#addBe") && lb) $("#addBe").onclick = () => openModal(shell("Add backend", `<label>Name<input id="n" value="web-4"></label><div class="two"><label>IP<input id="ip" value="${ip()}"></label><label>Port<input id="port" type="number" value="80"></label></div>`), () => {
+    lb.backends.push({id: nid("be-"), name: $("#n").value.trim() || "backend", ip: $("#ip").value.trim(), port: +$("#port").value || 80, weight: 1, drain: false, health: "Warning"});
+    close(); render();
+});
+  if ($("#check") && lb) $("#check").onclick = () => {lb.backends.forEach(b => {if (!b.drain) b.health = Math.random() > 0.2? "OK": "Critical";}); toast("Health check finished"); render();};
+  document.querySelectorAll("[data-drain]").forEach(el => el.onclick = () => {const b = lb.backends.find(x => x.id === el.dataset.drain); b.drain =!b.drain; render();});
+  document.querySelectorAll("[data-rm-be]").forEach(el => el.onclick = () => {lb.backends = lb.backends.filter(b => b.id!== el.dataset.rmBe); render();});
+  if ($("#addCert")) $("#addCert").onclick = () => openModal(shell("Add certificate", `<label>Name<input id="n" value="api-example"></label><label>Common name<input id="cn" value="api.example.com"></label><p class="sub">Paste a certificate name only. Do not paste a private key.</p>`), () => {
+    const cn = $("#cn").value.trim();
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(cn)) return toast("Enter a hostname, not a key.");
+    state.certs.push({id: nid("cert-"), name: $("#n").value.trim() || cn, cn, expires: "2027-12-31", region: state.region});
+    close(); render();
+});
+  document.querySelectorAll("[data-rm-cert]").forEach(el => el.onclick = () => {state.certs = state.certs.filter(c => c.id!== el.dataset.rmCert); render();});
+}
+document.querySelectorAll(".nav-btn").forEach(b => b.addEventListener("click", () => {state.view = b.dataset.view; render();}));
+render();
+</script>
+</body>
+</html>

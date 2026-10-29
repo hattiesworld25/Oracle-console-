@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Console — Virtual Cloud Networks</title>
+<style>
+:root{--red:#c74634;--ink:#161513;--muted:#6b6560;--line:#e6e2dc;--bg:#f6f5f3;--ok:#1b7a4a;--ok-bg:#e7f6ee;--stop:#8a3a32;--stop-bg:#fdecea;--warn:#9a6700;--warn-bg:#fff6e0;--blue:#1f4e8c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-rows:56px 1fr;grid-template-columns:228px 1fr;grid-template-areas:"top top" "side main"}
+header{grid-area:top;background:#1c1917;color:#fff;display:flex;align-items:center;gap:18px;padding:0 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.mark{width:28px;height:28px;border-radius:7px;background:#c74634;display:grid;place-items:center;font-weight:800;font-size:11px}
+.crumb{color:#c8c2bb;font-size:13px}.crumb b{color:#fff}.hdr-sp,.sp{flex:1}
+.region,.avatar{background:#2c2826;border:1px solid #3d3835;color:#eee;border-radius:8px;padding:6px 10px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+aside{grid-area:side;background:#fff;border-right:1px solid var(--line);padding:14px 10px}
+.nav-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 6px}
+.nav-btn{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.nav-btn.active,.nav-btn:hover{background:#f4efe9}.nav-btn.active{font-weight:600;box-shadow:inset 3px 0 0 var(--red)}
+main{grid-area:main;overflow:auto;padding:22px 28px 48px}
+h1{font-size:22px;margin:0 0 4px}h3{margin:0 0 8px}.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,select,input{font:inherit}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13.5px}
+.btn.primary{background:var(--red);border-color:#a33a2b;color:#fff}.btn.danger{color:var(--stop)}.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:10px}.stat{padding:14px 16px}
+.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:700}.panel{overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--muted);padding:10px 14px;background:#faf9f7}
+td{padding:12px 14px;border-top:1px solid #f0ece7;vertical-align:middle}
+tr.click:hover td{background:#fbf8f5;cursor:pointer}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.stop{background:var(--stop-bg);color:var(--stop)}.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.linkish{color:var(--blue);font-weight:600;cursor:pointer}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:8px 12px;font-size:13.5px}.kv span{color:var(--muted)}
+.pad{padding:16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 16px}
+.tab{border:0;background:transparent;padding:10px 12px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--ink);border-bottom:2px solid var(--red)}
+.note{background:var(--warn-bg);color:#6d4a00;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:13.5px}
+.diagram{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.node{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;min-width:140px;background:#fff}
+.node strong{display:block}.node em{color:var(--muted);font-style:normal;font-size:12px}
+.node.igw{background:#fff6e0}.node.pub{background:#e7f6ee}.node.priv{background:#f7f4ef}
+.modal-bg{position:fixed;inset:0;background:rgba(22,21,19,.45);display:none;place-items:center;z-index:20;padding:16px}
+.modal-bg.show{display:grid}.modal{width:min(680px,100%);background:#fff;border-radius:14px;max-height:calc(100vh - 32px);overflow:auto}
+.modal-h,.modal-f{padding:16px 18px;display:flex;align-items:center;gap:10px}
+.modal-h{border-bottom:1px solid var(--line)}.modal-f{border-top:1px solid var(--line);justify-content:flex-end}
+.modal-b{padding:16px 18px;display:grid;gap:12px}label{font-size:12.5px;font-weight:600;display:grid;gap:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.check{display:flex;gap:8px;align-items:center;font-size:13.5px}
+.toast{position:fixed;bottom:18px;right:18px;background:#1c1917;color:#fff;padding:12px 14px;border-radius:10px;display:none;z-index:30;max-width:380px}
+.toast.show{display:block}.empty{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-areas:"top" "main"}aside{display:none}.cards,.grid2,.grid3,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">VCN</div> Cloud Console</div>
+  <div class="crumb">Networking / <b>Virtual cloud networks</b></div>
+  <div class="hdr-sp"></div>
+  <div class="region" id="regionLabel">us-ashburn-1</div>
+  <div class="avatar">AL</div>
+</header>
+<aside>
+  <div class="nav-label">Networking</div>
+  <button class="nav-btn active" data-view="list" type="button">Virtual cloud networks</button>
+  <button class="nav-btn" data-view="subnets" type="button">Subnets</button>
+  <button class="nav-btn" data-view="security" type="button">Security lists</button>
+</aside>
+<main id="app"></main>
+<div class="modal-bg" id="modal"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* Local networking console. Port this data model later; do not call a cloud API from here.
+   VCN -> subnets, igw, nat, sgw, routeTables[].rules, securityLists[].rules
+   Persists in localStorage under cloud-vcn-demo. */
+const KEY = "cloud-vcn-demo";
+const REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1"];
+const COMPARTMENTS = ["root", "network", "production", "development"];
+const ADS = ["AD-1", "AD-2", "AD-3"];
+const state = {view: "list", tab: "overview", region: "us-ashburn-1", compartment: "network", selected: null, vcns: []};
+
+function nid(p) {return p + Math.random().toString(36).slice(2, 10);}
+function now() {return new Date().toISOString();}
+function $(s) {return document.querySelector(s);}
+function esc(s) {return String(s == null? "": s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function fmt(iso) {return new Date(iso).toLocaleString(undefined, {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});}
+function pill(text) {
+  const kind = text === "Available"? "ok": text === "Terminating"? "stop": "warn";
+  return `<span class="pill ${kind}"><span class="dot"></span>${esc(text)}</span>`;
+}
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+function validName(name) {return /^[A-Za-z][A-Za-z0-9_-]{0,40}$/.test(name);}
+function ipToInt(ip) {return ip.split(".").reduce((acc, n) => ((acc << 8) + Number(n)) >>> 0, 0);}
+function intToIp(n) {return [24, 16, 8, 0].map(shift => (n >>> shift) & 255).join(".");}
+function parseCidr(value) {
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$/.exec(String(value || "").trim());
+  if (!m) return null;
+  const octets = [1, 2, 3, 4].map(i => Number(m[i]));
+  const prefix = Number(m[5]);
+  if (octets.some(n => n > 255) || prefix > 32) return null;
+  const ip = octets.reduce((acc, n) => ((acc << 8) + n) >>> 0, 0);
+  const mask = prefix === 0? 0: (0xffffffff << (32 - prefix)) >>> 0;
+  const network = (ip & mask) >>> 0;
+  return {ip, prefix, network, broadcast: (network | (~mask >>> 0)) >>> 0, aligned: network === ip};
+}
+function contains(outer, inner) {
+  return inner.prefix >= outer.prefix && inner.network >= outer.network && inner.broadcast <= outer.broadcast;
+}
+function overlaps(a, b) {return a.network <= b.broadcast && b.network <= a.broadcast;}
+function nthSubnet(cidr, index, prefix) {
+  const base = parseCidr(cidr);
+  if (!base || prefix < base.prefix || prefix > 30) return "";
+  const size = 2 ** (32 - prefix);
+  const start = (base.network + index * size) >>> 0;
+  if (start < base.network || (start + size - 1) > base.broadcast) return "";
+  return intToIp(start) + "/" + prefix;
+}
+function suggestSubnet(vcn) {
+  const base = parseCidr(vcn.cidr);
+  if (!base) return "";
+  const prefix = base.prefix > 24? base.prefix: 24;
+  for (let i = 0; i < 256; i++) {
+    const cidr = nthSubnet(vcn.cidr, i, prefix);
+    const parsed = parseCidr(cidr);
+    if (!parsed) break;
+    const used = vcn.subnets.some(s => {const p = parseCidr(s.cidr); return p && overlaps(p, parsed);});
+    if (!used) return cidr;
+}
+  return "";
+}
+function busy(obj) {return obj && obj.state!== "Available";}
+function later(obj, next, ms) {
+  obj.state = next;
+  render();
+  setTimeout(() => {obj.state = "Available"; toast(obj.name + " is available"); render();}, ms);
+}
+function save() {
+  try {localStorage.setItem(KEY, JSON.stringify({region: state.region, compartment: state.compartment, vcns: state.vcns}));}
+  catch (e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    state.region = REGIONS.includes(data.region)? data.region: state.region;
+    state.compartment = COMPARTMENTS.includes(data.compartment)? data.compartment: state.compartment;
+    state.vcns = Array.isArray(data.vcns)? data.vcns: [];
+    return true;
+} catch (e) {return false;}
+}
+function makeVcn(name, cidr, dns, compartment) {
+  return {
+    id: nid("ocid1.vcn."), name, cidr, dns, compartment, region: state.region, state: "Provisioning", created: now(),
+    igw: null, nat: null, sgw: null,
+    routeTables: [{id: nid("ocid1.routetable."), name: "default-route-table", isDefault: true, rules: []}],
+    securityLists: [{id: nid("ocid1.securitylist."), name: "default-security-list", isDefault: true, rules: [
+      {id: nid("rule-"), dir: "Ingress", proto: "TCP", source: "0.0.0.0/0", ports: "22", desc: "SSH"},
+      {id: nid("rule-"), dir: "Ingress", proto: "ICMP", source: "0.0.0.0/0", ports: "all", desc: "Ping"},
+      {id: nid("rule-"), dir: "Egress", proto: "All", source: "0.0.0.0/0", ports: "all", desc: "All egress"}
+]}],
+    subnets: []
+};
+}
+function addGateway(vcn, kind, name) {
+  const item = {id: nid("ocid1." + kind + "."), name, state: "Provisioning", created: now()};
+  if (kind === "igw") item.enabled = true;
+  if (kind === "sgw") item.services = "All region services";
+  vcn[kind] = item;
+  later(item, "Provisioning", 500);
+}
+function seed() {
+  const vcn = makeVcn("demo-vcn", "10.0.0.0/16", "demovcn", "network");
+  vcn.state = "Available";
+  vcn.igw = {id: nid("ocid1.igw."), name: "demo-igw", enabled: true, state: "Available", created: now()};
+  vcn.nat = {id: nid("ocid1.nat."), name: "demo-nat", state: "Available", created: now()};
+  vcn.routeTables[0].rules.push({id: nid("rule-"), dest: "0.0.0.0/0", targetType: "internet", targetId: vcn.igw.id, desc: "Internet"});
+  const priv = {id: nid("ocid1.routetable."), name: "private-route-table", isDefault: false, rules: [
+    {id: nid("rule-"), dest: "0.0.0.0/0", targetType: "nat", targetId: vcn.nat.id, desc: "NAT egress"}
+]};
+  vcn.routeTables.push(priv);
+  const sl = vcn.securityLists[0].id;
+  vcn.subnets.push(
+    {id: nid("ocid1.subnet."), name: "public-subnet", cidr: "10.0.0.0/24", ad: "AD-1", access: "Public", routeTableId: vcn.routeTables[0].id, securityListId: sl, state: "Available", created: now()},
+    {id: nid("ocid1.subnet."), name: "private-subnet", cidr: "10.0.1.0/24", ad: "AD-1", access: "Private", routeTableId: priv.id, securityListId: sl, state: "Available", created: now()}
+);
+  state.vcns.push(vcn);
+}
+if (!load()) seed();
+
+function inScope(v) {return v.region === state.region && v.compartment === state.compartment;}
+function visible() {return state.vcns.filter(inScope);}
+function current() {return state.vcns.find(v => v.id === state.selected);}
+function findName(list, id) {const x = (list || []).find(i => i.id === id); return x? x.name: "Missing";}
+function targetLabel(vcn, rule) {
+  if (rule.targetType === "internet") return "Internet gateway: " + (vcn.igw? vcn.igw.name: "missing");
+  if (rule.targetType === "nat") return "NAT gateway: " + (vcn.nat? vcn.nat.name: "missing");
+  if (rule.targetType === "service") return "Service gateway: " + (vcn.sgw? vcn.sgw.name: "missing");
+  return "Private IP: " + rule.targetId;
+}
+function warnings(vcn) {
+  const notes = [];
+  if (vcn.igw &&!vcn.igw.enabled) notes.push("Internet gateway is disabled.");
+  vcn.subnets.filter(s => s.access === "Public").forEach(s => {
+    const rt = vcn.routeTables.find(r => r.id === s.routeTableId);
+    const ok = rt && rt.rules.some(r => r.dest === "0.0.0.0/0" && r.targetType === "internet");
+    if (!vcn.igw) notes.push(s.name + " is public but the VCN has no internet gateway.");
+    else if (!ok) notes.push(s.name + " has no 0.0.0.0/0 route to the internet gateway.");
+});
+  vcn.subnets.filter(s => s.access === "Private").forEach(s => {
+    const rt = vcn.routeTables.find(r => r.id === s.routeTableId);
+    if (!rt ||!rt.rules.some(r => r.targetType === "nat")) notes.push(s.name + " has no NAT route.");
+});
+  return notes;
+}
+function render() {
+  $("#regionLabel").textContent = state.region;
+  const nav = state.view === "detail"? "list": state.view;
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.view === nav));
+  const views = {list: viewList, detail: viewDetail, subnets: viewSubnets, security: viewSecurity};
+  $("#app").innerHTML = views[state.view]();
+  save();
+}
+function filters() {
+  return `<select data-change="region">${REGIONS.map(r => `<option ${r === state.region? "selected": ""}>${r}</option>`).join("")}</select>
+    <select data-change="compartment">${COMPARTMENTS.map(c => `<option ${c === state.compartment? "selected": ""}>${c}</option>`).join("")}</select>`;
+}
+function table(heads, rows, empty) {
+  return `<div class="panel"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td class="empty" colspan="${heads.length}">${empty}</td></tr>`}</tbody></table></div>`;
+}
+function viewList() {
+  const list = visible();
+  const subnets = list.reduce((n, v) => n + v.subnets.length, 0);
+  const gateways = list.reduce((n, v) => n + [v.igw, v.nat, v.sgw].filter(Boolean).length, 0);
+  const rules = list.reduce((n, v) => n + v.securityLists.reduce((a, s) => a + s.rules.length, 0), 0);
+  const rows = list.map(v => `<tr class="click" data-act="open-vcn" data-id="${v.id}"><td class="linkish">${esc(v.name)}</td><td>${pill(v.state)}</td><td class="mono">${esc(v.cidr)}</td><td>${v.subnets.length}</td><td>${[v.igw, v.nat, v.sgw].filter(Boolean).length}</td><td>${fmt(v.created)}</td></tr>`).join("");
+  return `<div class="row"><div><h1>Virtual cloud networks</h1><p class="sub">IPv4 only. Saved in this browser, not in a cloud account.</p></div><div class="sp"></div>${filters()}<button class="btn" type="button" data-act="reset">Reset</button><button class="btn primary" type="button" data-act="create-vcn">Create VCN</button></div>
+    <div class="cards"><div class="stat"><div class="k">VCNs</div><div class="v">${list.length}</div></div><div class="stat"><div class="k">Subnets</div><div class="v">${subnets}</div></div><div class="stat"><div class="k">Gateways</div><div class="v">${gateways}</div></div><div class="stat"><div class="k">Security rules</div><div class="v">${rules}</div></div></div>
+    ${table(["Name", "State", "CIDR", "Subnets", "Gateways", "Created"], rows, "No VCNs in this compartment and region.")}`;
+}
+function viewDetail() {
+  const vcn = current();
+  if (!vcn) {state.view = "list"; return viewList();}
+  const tabs = ["overview", "subnets", "gateways", "routing", "security"].map(t => `<button type="button" class="tab ${state.tab === t? "on": ""}" data-act="tab" data-id="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("");
+  const body = {overview: tabOverview, subnets: tabSubnets, gateways: tabGateways, routing: tabRouting, security: tabSecurity}[state.tab](vcn);
+  return `<div class="row"><button class="btn" type="button" data-act="back">← VCNs</button><div><h1 style="margin:0">${esc(vcn.name)}</h1><p class="sub" style="margin:2px 0 0">${esc(vcn.cidr)} · ${esc(vcn.compartment)} · ${esc(vcn.region)}</p></div><div class="sp"></div><button class="btn danger" type="button" data-act="delete-vcn" ${busy(vcn)? "disabled": ""}>Delete VCN</button></div><div class="tabs">${tabs}</div>${body}`;
+}
+function tabOverview(vcn) {
+  const notes = warnings(vcn).map(n => `<div class="note">${esc(n)}</div>`).join("");
+  const boxes = [`<div class="node"><strong>${esc(vcn.name)}</strong><em>${esc(vcn.cidr)}</em></div>`]
+.concat(vcn.igw? [`<div class="node igw"><strong>${esc(vcn.igw.name)}</strong><em>${vcn.igw.enabled? "Internet gateway": "IGW disabled"}</em></div>`]: [])
+.concat(vcn.nat? [`<div class="node"><strong>${esc(vcn.nat.name)}</strong><em>NAT gateway</em></div>`]: [])
+.concat(vcn.subnets.map(s => `<div class="node ${s.access === "Public"? "pub": "priv"}"><strong>${esc(s.name)}</strong><em>${esc(s.access)} · ${esc(s.cidr)}</em></div>`));
+  return `${notes}<div class="grid2"><div class="panel pad"><div class="kv"><span>OCID</span><div class="mono">${vcn.id}</div><span>DNS label</span><div>${esc(vcn.dns)}</div><span>State</span><div>${pill(vcn.state)}</div><span>Created</span><div>${fmt(vcn.created)}</div><span>Route tables</span><div>${vcn.routeTables.length}</div><span>Security lists</span><div>${vcn.securityLists.length}</div></div></div><div class="panel pad"><h3>Layout</h3><div class="diagram">${boxes.join("")}</div></div></div>`;
+}
+function tabSubnets(vcn) {
+  const rows = vcn.subnets.map(s => `<tr><td>${esc(s.name)}</td><td>${pill(s.state)}</td><td class="mono">${esc(s.cidr)}</td><td>${esc(s.access)}</td><td>${esc(s.ad)}</td><td>${esc(findName(vcn.routeTables, s.routeTableId))}</td><td><button class="btn" type="button" data-act="edit-subnet" data-id="${s.id}">Edit</button> <button class="btn danger" type="button" data-act="delete-subnet" data-id="${s.id}">Delete</button></td></tr>`).join("");
+  return `<div class="row" style="margin-bottom:12px"><div class="sp"></div><button class="btn primary" type="button" data-act="create-subnet">Create subnet</button></div>${table(["Name", "State", "CIDR", "Access", "AD", "Route table", ""], rows, "No subnets.")}`;
+}
+function gatewayCard(vcn, kind, title) {
+  const obj = vcn[kind];
+  if (!obj) return `<div class="panel pad"><h3>${title}</h3><p class="sub">Not created.</p><button class="btn primary" type="button" data-act="create-gw" data-id="${kind}">Create</button></div>`;
+  const extra = kind === "igw"? `<button class="btn" type="button" data-act="toggle-igw">${obj.enabled? "Disable": "Enable"}</button> `: "";
+  return `<div class="panel pad"><h3>${esc(obj.name)}</h3><div class="kv"><span>Type</span><div>${title}</div><span>State</span><div>${pill(obj.state)}</div><span>OCID</span><div class="mono">${obj.id}</div>${kind === "igw"? `<span>Enabled</span><div>${obj.enabled? "Yes": "No"}</div>`: ""}${kind === "sgw"? `<span>Services</span><div>${esc(obj.services)}</div>`: ""}</div><div style="height:10px"></div>${extra}<button class="btn danger" type="button" data-act="delete-gw" data-id="${kind}">Delete</button></div>`;
+}
+function tabGateways(vcn) {
+  return `<div class="grid3">${gatewayCard(vcn, "igw", "Internet gateway")}${gatewayCard(vcn, "nat", "NAT gateway")}${gatewayCard(vcn, "sgw", "Service gateway")}</div>`;
+}
+function tabRouting(vcn) {
+  const blocks = vcn.routeTables.map(rt => {
+    const rows = rt.rules.map(r => `<tr><td class="mono">${esc(r.dest)}</td><td>${esc(targetLabel(vcn, r))}</td><td>${esc(r.desc || "—")}</td><td><button class="btn danger" type="button" data-act="delete-route" data-id="${rt.id}" data-rule="${r.id}">Delete</button></td></tr>`).join("");
+    return `<div class="panel" style="margin-bottom:12px"><div class="pad row"><strong>${esc(rt.name)}</strong>${rt.isDefault? " <span class=\"k\">default</span>": ""}<div class="sp"></div><button class="btn" type="button" data-act="add-route" data-id="${rt.id}">Add rule</button>${rt.isDefault? "": `<button class="btn danger" type="button" data-act="delete-rt" data-id="${rt.id}">Delete table</button>`}</div>${table(["Destination", "Target", "Description", ""], rows, "No route rules.")}</div>`;
+}).join("");
+  return `<div class="row" style="margin-bottom:12px"><div class="sp"></div><button class="btn primary" type="button" data-act="create-rt">Create route table</button></div>${blocks}`;
+}
+function tabSecurity(vcn) {
+  return securityBlocks(vcn);
+}
+function securityBlocks(vcn) {
+  const blocks = vcn.securityLists.map(sl => {
+    const rows = sl.rules.map(r => `<tr><td>${esc(r.dir)}</td><td>${esc(r.proto)}</td><td class="mono">${esc(r.source)}</td><td>${esc(r.ports)}</td><td>${esc(r.desc || "—")}</td><td><button class="btn danger" type="button" data-act="delete-secrule" data-id="${sl.id}" data-rule="${r.id}">Delete</button></td></tr>`).join("");
+    return `<div class="panel" style="margin-bottom:12px"><div class="pad row"><strong>${esc(sl.name)}</strong><span class="k">${esc(vcn.name)}</span><div class="sp"></div><button class="btn" type="button" data-act="add-secrule" data-id="${sl.id}">Add rule</button>${sl.isDefault? "": `<button class="btn danger" type="button" data-act="delete-sl" data-id="${sl.id}">Delete list</button>`}</div>${table(["Direction", "Protocol", "Source / destination", "Ports", "Description", ""], rows, "No rules.")}</div>`;
+}).join("");
+  return `<div class="row" style="margin-bottom:12px"><div class="sp"></div><button class="btn primary" type="button" data-act="create-sl" data-id="${vcn.id}">Create security list</button></div>${blocks}`;
+}
+function viewSubnets() {
+  const rows = visible().flatMap(v => v.subnets.map(s => `<tr class="click" data-act="open-vcn" data-id="${v.id}"><td class="linkish">${esc(s.name)}</td><td>${esc(v.name)}</td><td>${pill(s.state)}</td><td class="mono">${esc(s.cidr)}</td><td>${esc(s.access)}</td><td>${esc(s.ad)}</td></tr>`)).join("");
+  return `<div class="row"><div><h1>Subnets</h1><p class="sub">${esc(state.compartment)} / ${esc(state.region)}</p></div><div class="sp"></div>${filters()}</div>${table(["Subnet", "VCN", "State", "CIDR", "Access", "AD"], rows, "No subnets in this scope.")}`;
+}
+function viewSecurity() {
+  const list = visible();
+  if (!list.length) return `<div class="row"><div><h1>Security lists</h1><p class="sub">Create a VCN first.</p></div><div class="sp"></div>${filters()}</div>`;
+  return `<div class="row"><div><h1>Security lists</h1><p class="sub">${esc(state.compartment)} / ${esc(state.region)}</p></div><div class="sp"></div>${filters()}</div>${list.map(securityBlocks).join("")}`;
+}
+function shell(title, fields, go) {
+  return `<div class="modal-h"><h2 style="margin:0">${title}</h2><div class="sp"></div><button class="btn" type="button" id="x">Close</button></div><div class="modal-b">${fields}</div><div class="modal-f"><button class="btn" type="button" id="cancel">Cancel</button><button class="btn primary" type="button" id="go">${go}</button></div>`;
+}
+function openModal(html, onGo) {
+  const m = $("#modal");
+  m.classList.add("show");
+  m.innerHTML = `<div class="modal">${html}</div>`;
+  $("#x").onclick = close;
+  $("#cancel").onclick = close;
+  $("#go").onclick = onGo;
+}
+function close() {$("#modal").classList.remove("show"); $("#modal").innerHTML = "";}
+function options(items, label) {return items.map(i => `<option value="${i.id}">${esc(label(i))}</option>`).join("");}
+function checkCidr(value, min, max) {
+  const parsed = parseCidr(value);
+  if (!parsed) return toast("Enter a CIDR like 10.0.0.0/16."), null;
+  if (!parsed.aligned) return toast("Use the network address, not a host address."), null;
+  if (parsed.prefix < min || parsed.prefix > max) return toast("Prefix must be /" + min + " to /" + max + "."), null;
+  return parsed;
+}
+function referenced(vcn, type, id) {
+  return vcn.routeTables.some(rt => rt.rules.some(r => r.targetType === type && r.targetId === id));
+}
+const actions = {
+  reset() {
+    if (!confirm("Clear saved networking data in this browser?")) return;
+    localStorage.removeItem(KEY);
+    state.vcns = [];
+    seed();
+    state.view = "list";
+    toast("Demo data reset");
+    render();
+},
+  back() {state.view = "list"; render();},
+  tab(id) {state.tab = id; render();},
+  "open-vcn"(id) {state.selected = id; state.view = "detail"; state.tab = "subnets"; render();},
+  "create-vcn"() {
+    openModal(shell("Create VCN", `<label>Name<input id="n" value="app-vcn"></label><div class="two"><label>IPv4 CIDR<input id="cidr" value="10.1.0.0/16"></label><label>DNS label<input id="dns" value="appvcn"></label></div><label class="check"><input id="pub" type="checkbox" checked> Create public subnet and internet gateway</label><label class="check"><input id="priv" type="checkbox" checked> Create private subnet and NAT gateway</label><label class="check"><input id="sgw" type="checkbox"> Create service gateway</label>`, "Create"), () => {
+      const name = $("#n").value.trim();
+      const dns = $("#dns").value.trim();
+      const parsed = checkCidr($("#cidr").value, 8, 30);
+      if (!parsed) return;
+      if (!validName(name)) return toast("Name must start with a letter.");
+      if (!/^[a-z][a-z0-9]{0,14}$/.test(dns)) return toast("DNS label must be lowercase, 1–15 characters.");
+      if (state.vcns.some(v => v.region === state.region && v.compartment === state.compartment && v.name === name)) return toast("That VCN name already exists here.");
+      const vcn = makeVcn(name, $("#cidr").value.trim(), dns, state.compartment);
+      const wantPublic = $("#pub").checked;
+      const wantPrivate = $("#priv").checked;
+      if (wantPublic) addGateway(vcn, "igw", name + "-igw");
+      if (wantPrivate) addGateway(vcn, "nat", name + "-nat");
+      if ($("#sgw").checked) addGateway(vcn, "sgw", name + "-sgw");
+      if (wantPublic) {
+        vcn.routeTables[0].rules.push({id: nid("rule-"), dest: "0.0.0.0/0", targetType: "internet", targetId: vcn.igw.id, desc: "Internet"});
+        vcn.subnets.push({id: nid("ocid1.subnet."), name: "public-subnet", cidr: nthSubnet(vcn.cidr, 0, 24) || vcn.cidr, ad: "AD-1", access: "Public", routeTableId: vcn.routeTables[0].id, securityListId: vcn.securityLists[0].id, state: "Available", created: now()});
+}
+      if (wantPrivate) {
+        const rt = {id: nid("ocid1.routetable."), name: "private-route-table", isDefault: false, rules: [{id: nid("rule-"), dest: "0.0.0.0/0", targetType: "nat", targetId: vcn.nat.id, desc: "NAT egress"}]};
+        vcn.routeTables.push(rt);
+        vcn.subnets.push({id: nid("ocid1.subnet."), name: "private-subnet", cidr: nthSubnet(vcn.cidr, wantPublic? 1: 0, 24) || vcn.cidr, ad: "AD-1", access: "Private", routeTableId: rt.id, securityListId: vcn.securityLists[0].id, state: "Available", created: now()});
+}
+      state.vcns.unshift(vcn);
+      close();
+      later(vcn, "Provisioning", 700);
+});
+},
+  "delete-vcn"() {
+    const vcn = current();
+    if (!vcn || busy(vcn)) return;
+    if (vcn.subnets.length) return toast("Delete subnets first.");
+    if (vcn.igw || vcn.nat || vcn.sgw) return toast("Delete gateways first.");
+    if (vcn.routeTables.some(rt =>!rt.isDefault)) return toast("Delete extra route tables first.");
+    if (vcn.securityLists.some(sl =>!sl.isDefault)) return toast("Delete extra security lists first.");
+    if (!confirm("Delete " + vcn.name + "?")) return;
+    vcn.state = "Terminating";
+    render();
+    setTimeout(() => {state.vcns = state.vcns.filter(v => v.id!== vcn.id); state.view = "list"; toast("VCN deleted"); render();}, 500);
+},
+  "create-subnet"() {
+    const vcn = current();
+    if (!vcn) return;
+    openModal(shell("Create subnet", `<label>Name<input id="n" value="app-subnet"></label><div class="two"><label>CIDR<input id="cidr" value="${esc(suggestSubnet(vcn))}"></label><label>Access<select id="access"><option>Private</option><option>Public</option></select></label></div><div class="two"><label>Availability domain<select id="ad">${ADS.map(a => `<option>${a}</option>`).join("")}</select></label><label>Route table<select id="rt">${options(vcn.routeTables, r => r.name)}</select></label></div><label>Security list<select id="sl">${options(vcn.securityLists, s => s.name)}</select></label>`, "Create"), () => {
+      const name = $("#n").value.trim();
+      const parsed = checkCidr($("#cidr").value, parseCidr(vcn.cidr).prefix, 30);
+      if (!parsed) return;
+      if (!validName(name)) return toast("Invalid subnet name.");
+      if (!contains(parseCidr(vcn.cidr), parsed)) return toast("Subnet CIDR must fit inside the VCN.");
+      if (vcn.subnets.some(s => overlaps(parseCidr(s.cidr), parsed))) return toast("That CIDR overlaps another subnet.");
+      vcn.subnets.push({id: nid("ocid1.subnet."), name, cidr: $("#cidr").value.trim(), ad: $("#ad").value, access: $("#access").value, routeTableId: $("#rt").value, securityListId: $("#sl").value, state: "Provisioning", created: now()});
+      close();
+      later(vcn.subnets[vcn.subnets.length - 1], "Provisioning", 500);
+});
+},
+  "edit-subnet"(id) {
+    const vcn = current();
+    const subnet = vcn && vcn.subnets.find(s => s.id === id);
+    if (!subnet || busy(subnet)) return toast(subnet? "Wait until the subnet is available.": "Subnet not found.");
+    openModal(shell("Edit subnet", `<label>Name<input id="n" value="${esc(subnet.name)}"></label><label>Route table<select id="rt">${vcn.routeTables.map(r => `<option value="${r.id}" ${r.id === subnet.routeTableId? "selected": ""}>${esc(r.name)}</option>`).join("")}</select></label><label>Security list<select id="sl">${vcn.securityLists.map(s => `<option value="${s.id}" ${s.id === subnet.securityListId? "selected": ""}>${esc(s.name)}</option>`).join("")}</select></label>`, "Save"), () => {
+      const name = $("#n").value.trim();
+      if (!validName(name)) return toast("Invalid subnet name.");
+      subnet.name = name;
+      subnet.routeTableId = $("#rt").value;
+      subnet.securityListId = $("#sl").value;
+      close();
+      toast("Subnet updated");
+      render();
+});
+},
+  "delete-subnet"(id) {
+    const vcn = current();
+    const subnet = vcn && vcn.subnets.find(s => s.id === id);
+    if (!subnet || busy(subnet)) return;
+    if (!confirm("Delete " + subnet.name + "?")) return;
+    subnet.state = "Terminating";
+    render();
+    setTimeout(() => {vcn.subnets = vcn.subnets.filter(s => s.id!== id); toast("Subnet deleted"); render();}, 400);
+},
+  "create-gw"(kind) {
+    const vcn = current();
+    if (!vcn || vcn[kind]) return;
+    const names = {igw: "igw", nat: "nat", sgw: "sgw"};
+    openModal(shell("Create gateway", `<label>Name<input id="n" value="${esc(vcn.name + "-" + names[kind])}"></label>`, "Create"), () => {
+      const name = $("#n").value.trim();
+      if (!validName(name)) return toast("Invalid gateway name.");
+      addGateway(vcn, kind, name);
+      close();
+      render();
+});
+},
+  "toggle-igw"() {
+    const vcn = current();
+    if (!vcn ||!vcn.igw || busy(vcn.igw)) return;
+    vcn.igw.enabled =!vcn.igw.enabled;
+    toast(vcn.igw.enabled? "Internet gateway enabled": "Internet gateway disabled");
+    render();
+},
+  "delete-gw"(kind) {
+    const vcn = current();
+    const obj = vcn && vcn[kind];
+    if (!obj || busy(obj)) return;
+    const type = kind === "igw"? "internet": kind === "nat"? "nat": "service";
+    if (referenced(vcn, type, obj.id)) return toast("Remove route rules that use this gateway first.");
+    if (!confirm("Delete " + obj.name + "?")) return;
+    vcn[kind] = null;
+    toast("Gateway deleted");
+    render();
+},
+  "create-rt"() {
+    const vcn = current();
+    openModal(shell("Create route table", `<label>Name<input id="n" value="app-route-table"></label>`, "Create"), () => {
+      const name = $("#n").value.trim();
+      if (!validName(name)) return toast("Invalid name.");
+      vcn.routeTables.push({id: nid("ocid1.routetable."), name, isDefault: false, rules: []});
+      close();
+      toast("Route table created");
+      render();
+});
+},
+  "delete-rt"(id) {
+    const vcn = current();
+    const rt = vcn.routeTables.find(r => r.id === id);
+    if (!rt || rt.isDefault) return toast("The default route table cannot be deleted.");
+    if (vcn.subnets.some(s => s.routeTableId === id)) return toast("A subnet still uses this route table.");
+    vcn.routeTables = vcn.routeTables.filter(r => r.id!== id);
+    toast("Route table deleted");
+    render();
+},
+  "add-route"(id) {
+    const vcn = current();
+    const rt = vcn.routeTables.find(r => r.id === id);
+    const targets = [];
+    if (vcn.igw) targets.push(`<option value="internet|${vcn.igw.id}">Internet gateway</option>`);
+    if (vcn.nat) targets.push(`<option value="nat|${vcn.nat.id}">NAT gateway</option>`);
+    if (vcn.sgw) targets.push(`<option value="service|${vcn.sgw.id}">Service gateway</option>`);
+    targets.push(`<option value="private|">Private IP</option>`);
+    openModal(shell("Add route rule", `<label>Destination CIDR<input id="dest" value="0.0.0.0/0"></label><label>Target<select id="target">${targets.join("")}</select></label><label>Private IP<input id="pip" placeholder="10.0.0.2"></label><label>Description<input id="desc" value=""></label>`, "Add"), () => {
+      const [targetType, targetId] = $("#target").value.split("|");
+      let dest = $("#dest").value.trim();
+      let resolved = targetId;
+      if (targetType === "service") dest = "all-services";
+      else {
+        const parsed = checkCidr(dest, 0, 32);
+        if (!parsed) return;
+        dest = $("#dest").value.trim();
+}
+      if (targetType === "private") {
+        if (!/^(\d{1,3}\.){3}\d{1,3}$/.test($("#pip").value.trim())) return toast("Enter a private IP.");
+        resolved = $("#pip").value.trim();
+}
+      if (rt.rules.some(r => r.dest === dest)) return toast("That destination already has a rule.");
+      rt.rules.push({id: nid("rule-"), dest, targetType, targetId: resolved, desc: $("#desc").value.trim()});
+      close();
+      toast("Route rule added");
+      render();
+});
+},
+  "delete-route"(id, btn) {
+    const vcn = current();
+    const rt = vcn.routeTables.find(r => r.id === id);
+    rt.rules = rt.rules.filter(r => r.id!== btn.dataset.rule);
+    render();
+},
+  "create-sl"(vcnId) {
+    const vcn = state.vcns.find(v => v.id === (vcnId || state.selected));
+    if (!vcn) return;
+    openModal(shell("Create security list", `<label>Name<input id="n" value="app-security-list"></label>`, "Create"), () => {
+      const name = $("#n").value.trim();
+      if (!validName(name)) return toast("Invalid name.");
+      vcn.securityLists.push({id: nid("ocid1.securitylist."), name, isDefault: false, rules: []});
+      close();
+      toast("Security list created");
+      render();
+});
+},
+  "delete-sl"(id) {
+    const vcn = ownerOfSl(id);
+    const sl = vcn && vcn.securityLists.find(s => s.id === id);
+    if (!sl || sl.isDefault) return toast("The default security list cannot be deleted.");
+    if (vcn.subnets.some(s => s.securityListId === id)) return toast("A subnet still uses this security list.");
+    vcn.securityLists = vcn.securityLists.filter(s => s.id!== id);
+    toast("Security list deleted");
+    render();
+},
+  "add-secrule"(id) {
+    const vcn = ownerOfSl(id);
+    const sl = vcn.securityLists.find(s => s.id === id);
+    openModal(shell("Add security rule", `<div class="two"><label>Direction<select id="dir"><option>Ingress</option><option>Egress</option></select></label><label>Protocol<select id="proto"><option>TCP</option><option>UDP</option><option>ICMP</option><option>All</option></select></label></div><label>Source or destination CIDR<input id="source" value="0.0.0.0/0"></label><label>Ports<input id="ports" value="443" placeholder="443 or 80-443 or all"></label><label>Description<input id="desc"></label>`, "Add"), () => {
+      const proto = $("#proto").value;
+      const source = checkCidr($("#source").value, 0, 32);
+      if (!source) return;
+      let ports = $("#ports").value.trim() || "all";
+      if (proto === "TCP" || proto === "UDP") {
+        const m = /^(\d{1,5})(?:-(\d{1,5}))?$/.exec(ports);
+        const a = m && Number(m[1]);
+        const b = m && Number(m[2] || m[1]);
+        if (!m || a < 1 || b > 65535 || a > b) return toast("Use a port or range from 1 to 65535.");
+        ports = a === b? String(a): a + "-" + b;
+} else ports = "all";
+      const rule = {dir: $("#dir").value, proto, source: $("#source").value.trim(), ports};
+      if (sl.rules.some(r => r.dir === rule.dir && r.proto === rule.proto && r.source === rule.source && r.ports === rule.ports)) return toast("That rule already exists.");
+      sl.rules.push({id: nid("rule-"),...rule, desc: $("#desc").value.trim()});
+      close();
+      toast("Security rule added");
+      render();
+});
+},
+  "delete-secrule"(id, btn) {
+    const vcn = ownerOfSl(id);
+    const sl = vcn.securityLists.find(s => s.id === id);
+    sl.rules = sl.rules.filter(r => r.id!== btn.dataset.rule);
+    render();
+}
+};
+function ownerOfSl(id) {return state.vcns.find(v => v.securityLists.some(s => s.id === id));}
+function onClick(e) {
+  const el = e.target.closest("[data-act]");
+  if (!el ||!$("#app").contains(el)) return;
+  const fn = actions[el.dataset.act];
+  if (fn) fn(el.dataset.id, el);
+}
+function onChange(e) {
+  const key = e.target.dataset.change;
+  if (!key) return;
+  state[key] = e.target.value;
+  state.view = state.view === "detail"? "list": state.view;
+  render();
+}
+document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => {state.view = btn.dataset.view; render();}));
+$("#app").addEventListener("click", onClick);
+$("#app").addEventListener("change", onChange);
+render();
+</script>
+</body>
+</html>

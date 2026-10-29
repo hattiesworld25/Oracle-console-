@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ORCL Studio</title>
+<style>
+:root {
+    --bg: #0b1220;
+    --panel: #121a2b;
+    --panel-2: #182338;
+    --line: #2a3a58;
+    --text: #e7eefc;
+    --muted: #8ea0c3;
+    --red: #c74634;
+    --red-2: #e85d4c;
+    --gold: #f0b429;
+    --ok: #3dd68c;
+    --warn: #f5a524;
+    --chip: #243352;
+    --shadow: 0 18px 50px rgba(0,0,0,.35);
+}
+  * {box-sizing: border-box;}
+  html, body {height: 100%; margin: 0;}
+  body {
+    font-family: "Segoe UI", Inter, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, rgba(199,70,52,.22), transparent 55%),
+      radial-gradient(900px 400px at 100% 0%, rgba(240,180,41,.08), transparent 50%),
+      var(--bg);
+    color: var(--text);
+    overflow: hidden;
+}
+  button, textarea, input {font: inherit; color: inherit;}
+.app {height: 100%; display: grid; grid-template-rows: 64px 1fr 28px;}
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 18px; border-bottom: 1px solid var(--line);
+    background: rgba(11,18,32,.8); backdrop-filter: blur(10px);
+}
+.mark {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(160deg, var(--red-2), #8d2418);
+    display: grid; place-items: center; font-weight: 800; letter-spacing: -.04em;
+    box-shadow: 0 8px 20px rgba(199,70,52,.35);
+}
+.brand {display: flex; flex-direction: column; line-height: 1.1;}
+.brand b {letter-spacing:.08em; font-size: 13px;}
+.brand span {color: var(--muted); font-size: 12px;}
+.pills {display: flex; gap: 8px; margin-left: 12px; flex-wrap: wrap;}
+.pill {
+    background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 10px; font-size: 12px; color: var(--muted);
+}
+.pill strong {color: var(--text); font-weight: 600;}
+.spacer {flex: 1;}
+.btn {
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+    border-radius: 10px; padding: 8px 12px; cursor: pointer; transition:.15s transform,.15s background;
+}
+.btn:hover {transform: translateY(-1px); background: #22314d;}
+.btn.primary {
+    background: linear-gradient(180deg, #e15a49, var(--red));
+    border-color: transparent; font-weight: 700;
+}
+.btn.primary:hover {filter: brightness(1.08);}
+.workspace {display: grid; grid-template-columns: 280px 1fr; min-height: 0;}
+  aside {
+    border-right: 1px solid var(--line); background: rgba(18,26,43,.9);
+    display: flex; flex-direction: column; min-height: 0;
+}
+.side-head {padding: 14px 14px 8px; display: flex; justify-content: space-between; align-items: center;}
+.side-head h2 {margin: 0; font-size: 12px; letter-spacing:.12em; color: var(--muted);}
+.tree {overflow: auto; padding: 6px 10px 16px;}
+.schema {margin-bottom: 8px;}
+.schema > button,.tbl {
+    width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
+    border-radius: 8px; padding: 8px 8px;
+}
+.schema > button {color: var(--gold); font-weight: 700;}
+.tbl {color: var(--text); display: flex; justify-content: space-between;}
+.tbl:hover,.schema > button:hover {background: #1d2b46;}
+.tbl small {color: var(--muted);}
+.cols {padding: 0 8px 8px 22px; color: var(--muted); font-size: 12px;}
+.cols div {padding: 3px 0; display: flex; justify-content: space-between;}
+  main {display: grid; grid-template-rows: 46% 54%; min-height: 0;}
+.editor-wrap,.results {min-height: 0; display: flex; flex-direction: column;}
+.toolbar {
+    display: flex; gap: 8px; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+}
+.toolbar.hint {color: var(--muted); font-size: 12px; margin-left: 6px;}
+  textarea {
+    flex: 1; resize: none; border: 0; outline: none; background: transparent;
+    padding: 14px 16px; line-height: 1.55; font-family: "Cascadia Code", "SF Mono", Consolas, monospace;
+    font-size: 14px;
+}
+.results {border-top: 1px solid var(--line); background: #0e1626;}
+.tabs {display: flex; gap: 6px;}
+.tab {
+    background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 6px 8px; border-radius: 8px;
+}
+.tab.on {color: var(--text); background: var(--chip);}
+.grid-wrap {overflow: auto; flex: 1; padding: 0 0 8px;}
+  table {border-collapse: collapse; width: 100%; font-size: 13px;}
+  th, td {padding: 9px 12px; border-bottom: 1px solid #223049; text-align: left; white-space: nowrap;}
+  th {position: sticky; top: 0; background: #152033; color: var(--muted); font-weight: 600;}
+  tr:hover td {background: rgba(255,255,255,.03);}
+.msg {padding: 16px;}
+.msg.ok {color: var(--ok);}
+.msg.err {color: #ff8d80;}
+.empty {color: var(--muted); padding: 28px 16px;}
+  footer {
+    display: flex; align-items: center; gap: 16px; padding: 0 14px;
+    border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; background: #0a101b;
+}
+.dot {width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok);}
+  kbd {border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; color: var(--text);}
+  @media (max-width: 860px) {
+    body {overflow: auto;}
+.app {height: auto; min-height: 100%; grid-template-rows: auto 1fr auto;}
+.workspace {grid-template-columns: 1fr;}
+    aside {max-height: 240px; border-right: 0; border-bottom: 1px solid var(--line);}
+    main {min-height: 70vh;}
+.pills {display: none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="mark">O</div>
+    <div class="brand"><b>ORCL STUDIO</b><span>Local relational engine · HR sample</span></div>
+    <div class="pills">
+      <div class="pill">Service <strong id="svc">ORCL</strong></div>
+      <div class="pill">Schema <strong>HR</strong></div>
+      <div class="pill">Session <strong>SYS</strong></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="seedBtn">Reload sample</button>
+    <button class="btn" id="exportBtn">Export SQL</button>
+  </header>
+  <div class="workspace">
+    <aside>
+      <div class="side-head"><h2>OBJECTS</h2><span id="objCount" class="pill">0</span></div>
+      <div class="tree" id="tree"></div>
+    </aside>
+    <main>
+      <section class="editor-wrap">
+        <div class="toolbar">
+          <button class="btn primary" id="runBtn">Run</button>
+          <button class="btn" id="clearBtn">Clear</button>
+          <span class="hint">Statements end with <kbd>;</kbd> · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs</span>
+        </div>
+        <textarea id="sql" spellcheck="false">-- Classic HR sample is already loaded.
+SELECT e.employee_id, e.last_name, e.job_id, d.department_name, e.salary
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+WHERE e.salary >= 8000
+ORDER BY e.salary DESC;</textarea>
+      </section>
+      <section class="results">
+        <div class="toolbar">
+          <div class="tabs">
+            <button class="tab on" data-tab="out">Output</button>
+            <button class="tab" data-tab="hist">History</button>
+          </div>
+          <div class="spacer"></div>
+          <span class="hint" id="statusLine">Ready</span>
+        </div>
+        <div class="grid-wrap" id="out"></div>
+        <div class="grid-wrap" id="hist" hidden></div>
+      </section>
+    </main>
+  </div>
+  <footer>
+    <span class="dot"></span>
+    <span>Connected · in-memory · nothing leaves this browser</span>
+    <span id="clock"></span>
+  </footer>
+</div>
+<script>
+const state = {tables: {}, history: []};
+
+function ident(s) {return String(s).replace(/"/g, "").toUpperCase();}
+function fail(m) {const e = new Error(m); e.user = true; throw e;}
+
+function seed() {
+  state.tables = {};
+  execSilent(`CREATE TABLE departments (
+    department_id NUMBER PRIMARY KEY,
+    department_name VARCHAR2(40) NOT NULL,
+    location VARCHAR2(40)
+)`);
+  execSilent(`CREATE TABLE employees (
+    employee_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(30),
+    last_name VARCHAR2(30) NOT NULL,
+    email VARCHAR2(40),
+    job_id VARCHAR2(20),
+    salary NUMBER,
+    department_id NUMBER
+)`);
+  const depts = [
+    [10,"Administration","Seattle"],
+    [20,"Marketing","San Francisco"],
+    [30,"Purchasing","Chicago"],
+    [50,"Shipping","Southlake"],
+    [60,"IT","Austin"],
+    [90,"Executive","Redwood City"]
+];
+  depts.forEach(r => execSilent(`INSERT INTO departments VALUES (${r[0]}, '${r[1]}', '${r[2]}')`));
+  const emps = [
+    [100,"Steven","King","SKING","AD_PRES",24000,90],
+    [101,"Neena","Kochhar","NKOCHHAR","AD_VP",17000,90],
+    [102,"Lex","De Haan","LDEHAAN","AD_VP",17000,90],
+    [103,"Alexander","Hunold","AHUNOLD","IT_PROG",9000,60],
+    [104,"Bruce","Ernst","BERNST","IT_PROG",6000,60],
+    [108,"Nancy","Greenberg","NGREENBE","FI_MGR",12008,null],
+    [145,"John","Russell","JRUSSEL","SA_MAN",14000,20],
+    [146,"Karen","Partners","KPARTNER","SA_MAN",13500,20],
+    [200,"Jennifer","Whalen","JWHALEN","AD_ASST",4400,10],
+    [201,"Michael","Hartstein","MHARTSTE","MK_MAN",13000,20],
+    [202,"Pat","Fay","PFAY","MK_REP",6000,20],
+    [205,"Shelley","Higgins","SHIGGINS","AC_MGR",12008,null],
+    [206,"William","Gietz","WGIETZ","AC_ACCOUNT",8300,null]
+];
+  emps.forEach(r => {
+    const dep = r[6] == null? "NULL": r[6];
+    execSilent(`INSERT INTO employees VALUES (${r[0]}, '${r[1]}', '${r[2]}', '${r[3]}', '${r[4]}', ${r[5]}, ${dep})`);
+});
+}
+
+function execSilent(sql) {return runStatement(sql);}
+
+function tokenize(sql) {
+  const t = [];
+  let i = 0;
+  const s = sql;
+  while (i < s.length) {
+    if (/\s/.test(s[i])) {i++; continue;}
+    if (s[i] === "-" && s[i+1] === "-") {while (i < s.length && s[i]!== "\n") i++; continue;}
+    if (s[i] === "'") {
+      let j = i + 1, str = "";
+      while (j < s.length) {
+        if (s[j] === "'" && s[j+1] === "'") {str += "'"; j += 2; continue;}
+        if (s[j] === "'") break;
+        str += s[j++];
+}
+      if (j >= s.length) fail("Unclosed string");
+      t.push({type: "str", v: str}); i = j + 1; continue;
+}
+    if (/[0-9]/.test(s[i]) || (s[i] === "." && /[0-9]/.test(s[i+1] || ""))) {
+      let j = i;
+      while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      t.push({type: "num", v: Number(s.slice(i, j))}); i = j; continue;
+}
+    if (/[A-Za-z_]/.test(s[i])) {
+      let j = i;
+      while (j < s.length && /[A-Za-z0-9_$#]/.test(s[j])) j++;
+      t.push({type: "id", v: s.slice(i, j)}); i = j; continue;
+}
+    const two = s.slice(i, i+2);
+    if ([">=","<=","<>","!="].includes(two)) {t.push({type: "op", v: two}); i += 2; continue;}
+    if ("(),*=<>.;".includes(s[i])) {t.push({type: "op", v: s[i]}); i++; continue;}
+    fail("Unexpected character: " + s[i]);
+}
+  return t;
+}
+
+function Parser(tokens) {
+  this.t = tokens; this.i = 0;
+  this.peek = () => this.t[this.i];
+  this.next = () => this.t[this.i++];
+  this.eat = (v) => {
+    const p = this.peek();
+    if (!p || p.v.toString().toUpperCase()!== v.toUpperCase()) return false;
+    this.i++; return true;
+};
+  this.expect = (v) => {if (!this.eat(v)) fail("Expected " + v);};
+  this.id = () => {
+    const p = this.next();
+    if (!p || (p.type!== "id" && p.type!== "str")) fail("Expected identifier");
+    return ident(p.v);
+};
+}
+
+function splitStatements(sql) {
+  const parts = [];
+  let buf = "", q = false;
+  for (let i = 0; i < sql.length; i++) {
+    const c = sql[i];
+    if (c === "'") {
+      buf += c;
+      if (q && sql[i+1] === "'") {buf += sql[++i]; continue;}
+      q =!q; continue;
+}
+    if (c === ";" &&!q) {if (buf.trim()) parts.push(buf.trim()); buf = ""; continue;}
+    buf += c;
+}
+  if (buf.trim()) parts.push(buf.trim());
+  return parts;
+}
+
+function parseCreate(p) {
+  p.expect("TABLE");
+  const name = p.id();
+  p.expect("(");
+  const columns = [];
+  while (p.peek() && p.peek().v!== ")") {
+    const col = p.id();
+    let type = "VARCHAR2";
+    if (p.peek() && p.peek().type === "id" &&!["PRIMARY","NOT","NULL","UNIQUE"].includes(p.peek().v.toUpperCase())) {
+      type = p.id();
+      if (p.eat("(")) {while (p.peek() && p.peek().v!== ")") p.next(); p.expect(")");}
+}
+    let pk = false, notNull = false;
+    while (p.peek() && p.peek().type === "id" && ["PRIMARY","NOT","NULL","UNIQUE"].includes(p.peek().v.toUpperCase())) {
+      if (p.eat("PRIMARY")) {p.expect("KEY"); pk = true; notNull = true;}
+      else if (p.eat("NOT")) {p.expect("NULL"); notNull = true;}
+      else if (p.eat("NULL")) {}
+      else if (p.eat("UNIQUE")) {}
+}
+    columns.push({name: col, type, pk, notNull});
+    p.eat(",");
+}
+  p.expect(")");
+  return {kind: "create", name, columns};
+}
+
+function parseInsert(p) {
+  p.expect("INTO");
+  const table = p.id();
+  let cols = null;
+  if (p.eat("(")) {
+    cols = [];
+    do {cols.push(p.id());} while (p.eat(","));
+    p.expect(")");
+}
+  p.expect("VALUES");
+  const rows = [];
+  do {
+    p.expect("(");
+    const vals = [];
+    do {vals.push(parseValue(p));} while (p.eat(","));
+    p.expect(")");
+    rows.push(vals);
+} while (p.eat(","));
+  return {kind: "insert", table, cols, rows};
+}
+
+function parseValue(p) {
+  const t = p.peek();
+  if (!t) fail("Expected value");
+  if (t.type === "id" && t.v.toUpperCase() === "NULL") {p.next(); return null;}
+  if (t.type === "id" && t.v.toUpperCase() === "SYSDATE") {p.next(); return new Date().toISOString().slice(0, 19).replace("T", " ");}
+  if (t.type === "str" || t.type === "num") {p.next(); return t.v;}
+  if (t.type === "id") {p.next(); return t.v;}
+  fail("Bad value");
+}
+
+function parseExpr(p) {
+  return parseOr(p);
+}
+function parseOr(p) {
+  let left = parseAnd(p);
+  while (p.peek() && p.peek().type === "id" && p.peek().v.toUpperCase() === "OR") {
+    p.next(); left = {op: "OR", left, right: parseAnd(p)};
+}
+  return left;
+}
+function parseAnd(p) {
+  let left = parseNot(p);
+  while (p.peek() && p.peek().type === "id" && p.peek().v.toUpperCase() === "AND") {
+    p.next(); left = {op: "AND", left, right: parseNot(p)};
+}
+  return left;
+}
+function parseNot(p) {
+  if (p.peek() && p.peek().type === "id" && p.peek().v.toUpperCase() === "NOT") {
+    p.next(); return {op: "NOT", left: parseCmp(p)};
+}
+  return parseCmp(p);
+}
+function parseCmp(p) {
+  if (p.eat("(")) {const e = parseExpr(p); p.expect(")"); return e;}
+  const left = parseAtom(p);
+  const opTok = p.peek();
+  if (opTok && opTok.type === "op" && ["=","<>","!=",">","<",">=","<="].includes(opTok.v)) {
+    p.next();
+    const right = parseAtom(p);
+    return {op: opTok.v === "!="? "<>": opTok.v, left, right};
+}
+  if (opTok && opTok.type === "id" && ["LIKE","IS"].includes(opTok.v.toUpperCase())) {
+    const word = opTok.v.toUpperCase(); p.next();
+    if (word === "IS") {
+      const neg = p.eat("NOT");
+      p.expect("NULL");
+      return {op: neg? "IS NOT NULL": "IS NULL", left};
+}
+    const right = parseAtom(p);
+    return {op: "LIKE", left, right};
+}
+  return left;
+}
+function parseAtom(p) {
+  if (p.eat("(")) {const e = parseExpr(p); p.expect(")"); return e;}
+  const t = p.peek();
+  if (!t) fail("Expected expression");
+  if (t.type === "num" || t.type === "str") {p.next(); return {lit: t.v};}
+  if (t.type === "id" && t.v.toUpperCase() === "NULL") {p.next(); return {lit: null};}
+  if (t.type === "id" && t.v.toUpperCase() === "SYSDATE") {p.next(); return {lit: new Date().toISOString().slice(0,19).replace("T"," ")};}
+  if (t.type === "id") {
+    const a = p.id();
+    if (p.eat("(")) {
+      if (p.peek() && p.peek().v === "*") {p.next(); p.expect(")"); return {fn: a, arg: "*"};}
+      const arg = parseExpr(p); p.expect(")"); return {fn: a, arg};
+}
+    if (p.eat(".")) return {col: p.id(), table: a};
+    return {col: a};
+}
+  fail("Bad expression near " + (t.v || ""));
+}
+
+function parseSelect(p) {
+  const items = [];
+  if (p.eat("*")) items.push({star: true});
+  else {
+    do {
+      if (p.peek() && p.peek().v === "*") {p.next(); items.push({star: true});}
+      else {
+        const expr = parseExpr(p);
+        let alias = null;
+        if (p.peek() && p.peek().type === "id" &&!["FROM","WHERE","ORDER","GROUP","JOIN","LEFT","INNER","ON","AND","OR"].includes(p.peek().v.toUpperCase())) {
+          alias = p.id();
+}
+        items.push({expr, alias});
+}
+} while (p.eat(","));
+}
+  p.expect("FROM");
+  const from = parseFrom(p);
+  let where = null;
+  if (p.eat("WHERE")) where = parseExpr(p);
+  let order = [];
+  if (p.eat("ORDER")) {
+    p.expect("BY");
+    do {
+      const expr = parseExpr(p);
+      const dir = (p.eat("DESC"))? "DESC": (p.eat("ASC"), "ASC");
+      order.push({expr, dir});
+} while (p.eat(","));
+}
+  return {kind: "select", items, from, where, order};
+}
+
+function parseFrom(p) {
+  const sources = [{table: p.id(), alias: maybeAlias(p)}];
+  while (p.peek() && (p.peek().type === "id" && ["JOIN","INNER","LEFT"].includes(p.peek().v.toUpperCase()) || p.peek().v === ",")) {
+    if (p.eat(",")) {
+      sources.push({table: p.id(), alias: maybeAlias(p), type: "cross"});
+} else {
+      let type = "inner";
+      if (p.eat("LEFT")) {p.eat("OUTER"); type = "left";}
+      else p.eat("INNER");
+      p.expect("JOIN");
+      const table = p.id();
+      const alias = maybeAlias(p);
+      p.expect("ON");
+      const on = parseExpr(p);
+      sources.push({table, alias, type, on});
+}
+}
+  return sources;
+}
+function maybeAlias(p) {
+  if (!p.peek() || p.peek().type!== "id") return null;
+  const w = p.peek().v.toUpperCase();
+  if (["WHERE","JOIN","INNER","LEFT","ORDER","GROUP","ON","SET"].includes(w)) return null;
+  return p.id();
+}
+
+function parseUpdate(p) {
+  const table = p.id();
+  p.expect("SET");
+  const sets = [];
+  do {
+    const col = p.id(); p.expect("="); sets.push({col, expr: parseExpr(p)});
+} while (p.eat(","));
+  let where = null;
+  if (p.eat("WHERE")) where = parseExpr(p);
+  return {kind: "update", table, sets, where};
+}
+function parseDelete(p) {
+  p.expect("FROM");
+  const table = p.id();
+  let where = null;
+  if (p.eat("WHERE")) where = parseExpr(p);
+  return {kind: "delete", table, where};
+}
+function parseDrop(p) {
+  p.expect("TABLE");
+  const name = p.id();
+  return {kind: "drop", name};
+}
+function parseDescribe(p) {
+  const name = p.id();
+  return {kind: "desc", name};
+}
+
+function parseStatement(sql) {
+  const p = new Parser(tokenize(sql));
+  const first = p.peek();
+  if (!first) fail("Empty statement");
+  const w = first.v.toUpperCase();
+  p.next();
+  if (w === "CREATE") return parseCreate(p);
+  if (w === "INSERT") return parseInsert(p);
+  if (w === "SELECT") return parseSelect(p);
+  if (w === "UPDATE") return parseUpdate(p);
+  if (w === "DELETE") return parseDelete(p);
+  if (w === "DROP") return parseDrop(p);
+  if (w === "DESCRIBE" || w === "DESC") return parseDescribe(p);
+  if (w === "SHOW") return {kind: "show"};
+  fail("Unsupported statement: " + w + ". Try SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, DESCRIBE.");
+}
+
+function getTable(name) {
+  const t = state.tables[ident(name)];
+  if (!t) fail("Table does not exist: " + ident(name));
+  return t;
+}
+
+function evalExpr(expr, row, scope) {
+  if (!expr) return null;
+  if (expr.lit!== undefined) return expr.lit;
+  if (expr.fn) {
+    const fn = expr.fn;
+    if (fn === "COUNT") return expr.arg === "*"? 1: (evalExpr(expr.arg, row, scope) == null? 0: 1);
+    if (fn === "UPPER") return String(evalExpr(expr.arg, row, scope)?? "").toUpperCase();
+    if (fn === "LOWER") return String(evalExpr(expr.arg, row, scope)?? "").toLowerCase();
+    if (fn === "NVL") fail("NVL needs two arguments; use COALESCE-style in WHERE or a literal");
+    if (fn === "LENGTH") return String(evalExpr(expr.arg, row, scope)?? "").length;
+    fail("Unknown function " + fn);
+}
+  if (expr.col) {
+    const key = expr.table? expr.table + "." + expr.col: expr.col;
+    if (row[key]!== undefined) return row[key];
+    const hits = Object.keys(row).filter(k => k.endsWith("." + expr.col) || k === expr.col);
+    if (hits.length === 1) return row[hits[0]];
+    if (hits.length > 1) fail("Ambiguous column " + expr.col);
+    return undefined;
+}
+  if (expr.op === "AND") return truth(evalExpr(expr.left, row, scope)) && truth(evalExpr(expr.right, row, scope));
+  if (expr.op === "OR") return truth(evalExpr(expr.left, row, scope)) || truth(evalExpr(expr.right, row, scope));
+  if (expr.op === "NOT") return!truth(evalExpr(expr.left, row, scope));
+  if (expr.op === "IS NULL") return evalExpr(expr.left, row, scope) == null;
+  if (expr.op === "IS NOT NULL") return evalExpr(expr.left, row, scope)!= null;
+  const l = evalExpr(expr.left, row, scope);
+  const r = evalExpr(expr.right, row, scope);
+  if (expr.op === "LIKE") {
+    if (l == null || r == null) return false;
+    const re = new RegExp("^" + String(r).replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/%/g, ".*").replace(/_/g, ".") + "$", "i");
+    return re.test(String(l));
+}
+  if (l == null || r == null) {
+    if (expr.op === "=") return l == null && r == null;
+    if (expr.op === "<>") return!(l == null && r == null);
+    return false;
+}
+  const ln = typeof l === "number" || /^-?\d+(\.\d+)?$/.test(String(l))? Number(l): l;
+  const rn = typeof r === "number" || /^-?\d+(\.\d+)?$/.test(String(r))? Number(r): r;
+  const bothNum = typeof ln === "number" && typeof rn === "number" &&!Number.isNaN(ln) &&!Number.isNaN(rn);
+  const A = bothNum? ln: String(l).toUpperCase();
+  const B = bothNum? rn: String(r).toUpperCase();
+  if (expr.op === "=") return A === B;
+  if (expr.op === "<>") return A!== B;
+  if (expr.op === ">") return A > B;
+  if (expr.op === "<") return A < B;
+  if (expr.op === ">=") return A >= B;
+  if (expr.op === "<=") return A <= B;
+  return A;
+}
+function truth(v) {return!!v;}
+
+function projectRow(table, alias, data) {
+  const prefix = alias || table.name;
+  const out = {};
+  table.columns.forEach(c => {out[prefix + "." + c.name] = data[c.name];});
+  return out;
+}
+
+function doSelect(ast) {
+  let rows = [];
+  const base = ast.from[0];
+  const bt = getTable(base.table);
+  bt.rows.forEach(r => rows.push(projectRow(bt, base.alias, r)));
+  for (let s = 1; s < ast.from.length; s++) {
+    const src = ast.from[s];
+    const t = getTable(src.table);
+    const next = [];
+    if (src.type === "cross") {
+      rows.forEach(left => t.rows.forEach(r => next.push({...left,...projectRow(t, src.alias, r)})));
+} else {
+      rows.forEach(left => {
+        let matched = false;
+        t.rows.forEach(r => {
+          const joined = {...left,...projectRow(t, src.alias, r)};
+          if (evalExpr(src.on, joined)) {next.push(joined); matched = true;}
+});
+        if (!matched && src.type === "left") {
+          const empty = {};
+          t.columns.forEach(c => empty[(src.alias || t.name) + "." + c.name] = null);
+          next.push({...left,...empty});
+}
+});
+}
+    rows = next;
+}
+  if (ast.where) rows = rows.filter(r => evalExpr(ast.where, r));
+
+  const agg = ast.items.some(it => it.expr && it.expr.fn && ["COUNT","SUM","AVG","MIN","MAX"].includes(it.expr.fn));
+  if (agg) {
+    const out = {};
+    ast.items.forEach(it => {
+      const name = it.alias || (it.expr.fn + (it.expr.arg === "*"? "(*)": ""));
+      if (it.expr.fn === "COUNT") out[name] = it.expr.arg === "*"? rows.length: rows.filter(r => evalExpr(it.expr.arg, r)!= null).length;
+      else {
+        const nums = rows.map(r => Number(evalExpr(it.expr.arg, r))).filter(n =>!Number.isNaN(n));
+        if (it.expr.fn === "SUM") out[name] = nums.reduce((a,b)=>a+b,0);
+        if (it.expr.fn === "AVG") out[name] = nums.length? Math.round((nums.reduce((a,b)=>a+b,0)/nums.length)*100)/100: null;
+        if (it.expr.fn === "MIN") out[name] = nums.length? Math.min(...nums): null;
+        if (it.expr.fn === "MAX") out[name] = nums.length? Math.max(...nums): null;
+}
+});
+    return {columns: Object.keys(out), rows: [out], message: "1 row selected"};
+}
+
+  if (ast.order.length) {
+    rows.sort((a, b) => {
+      for (const o of ast.order) {
+        const av = evalExpr(o.expr, a), bv = evalExpr(o.expr, b);
+        if (av == null && bv == null) continue;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        if (av < bv) return o.dir === "DESC"? 1: -1;
+        if (av > bv) return o.dir === "DESC"? -1: 1;
+}
+      return 0;
+});
+}
+
+  const columns = [];
+  const projected = rows.map(r => {
+    const o = {};
+    if (ast.items.some(i => i.star)) {
+      Object.keys(r).forEach(k => {
+        const label = k.includes(".")? k.split(".").pop(): k;
+        const name = columns.includes(label)? k: label;
+        if (!columns.includes(name)) columns.push(name);
+        o[name] = r[k];
+});
+}
+    ast.items.filter(i =>!i.star).forEach(it => {
+      const name = it.alias || it.expr.col || "EXPR";
+      if (!columns.includes(name)) columns.push(name);
+      o[name] = evalExpr(it.expr, r);
+});
+    return o;
+});
+  if (!columns.length && projected[0]) columns.push(...Object.keys(projected[0]));
+  return {columns, rows: projected, message: projected.length + " row" + (projected.length === 1? "": "s") + " selected"};
+}
+
+function doInsert(ast) {
+  const t = getTable(ast.table);
+  const cols = ast.cols? ast.cols.map(ident): t.columns.map(c => c.name);
+  let n = 0;
+  ast.rows.forEach(vals => {
+    if (vals.length!== cols.length) fail("Column count does not match value count");
+    const row = {};
+    t.columns.forEach(c => row[c.name] = null);
+    cols.forEach((c, i) => {
+      if (!t.columns.find(x => x.name === c)) fail("Invalid column " + c);
+      row[c] = vals[i];
+});
+    t.columns.forEach(c => {
+      if (c.notNull && (row[c.name] == null || row[c.name] === "")) fail("Cannot insert NULL into " + c.name);
+      if (c.pk && t.rows.some(r => String(r[c.name]) === String(row[c.name]))) fail("Unique constraint violated on " + c.name);
+});
+    t.rows.push(row); n++;
+});
+  return {message: n + " row" + (n === 1? "": "s") + " created", columns: [], rows: []};
+}
+
+function doUpdate(ast) {
+  const t = getTable(ast.table);
+  let n = 0;
+  t.rows.forEach(r => {
+    const scoped = projectRow(t, null, r);
+    if (ast.where &&!evalExpr(ast.where, scoped)) return;
+    ast.sets.forEach(s => {r[s.col] = evalExpr(s.expr, scoped);});
+    n++;
+});
+  return {message: n + " row" + (n === 1? "": "s") + " updated", columns: [], rows: []};
+}
+function doDelete(ast) {
+  const t = getTable(ast.table);
+  const before = t.rows.length;
+  t.rows = t.rows.filter(r => ast.where &&!evalExpr(ast.where, projectRow(t, null, r)));
+  if (!ast.where) t.rows = [];
+  const n = before - t.rows.length;
+  return {message: n + " row" + (n === 1? "": "s") + " deleted", columns: [], rows: []};
+}
+function doCreate(ast) {
+  if (state.tables[ast.name]) fail("Name is already used by an existing object");
+  if (!ast.columns.length) fail("Table needs at least one column");
+  state.tables[ast.name] = {name: ast.name, columns: ast.columns, rows: []};
+  return {message: "Table " + ast.name + " created", columns: [], rows: []};
+}
+function doDrop(ast) {
+  if (!state.tables[ast.name]) fail("Table does not exist: " + ast.name);
+  delete state.tables[ast.name];
+  return {message: "Table " + ast.name + " dropped", columns: [], rows: []};
+}
+function doDesc(ast) {
+  const t = getTable(ast.name);
+  return {
+    columns: ["COLUMN_NAME", "DATA_TYPE", "NULLABLE", "KEY"],
+    rows: t.columns.map(c => ({COLUMN_NAME: c.name, DATA_TYPE: c.type, NULLABLE: c.notNull? "N": "Y", KEY: c.pk? "PK": ""})),
+    message: "Described " + t.name
+};
+}
+
+function runStatement(sql) {
+  const ast = parseStatement(sql);
+  if (ast.kind === "create") return doCreate(ast);
+  if (ast.kind === "insert") return doInsert(ast);
+  if (ast.kind === "select") return doSelect(ast);
+  if (ast.kind === "update") return doUpdate(ast);
+  if (ast.kind === "delete") return doDelete(ast);
+  if (ast.kind === "drop") return doDrop(ast);
+  if (ast.kind === "desc") return doDesc(ast);
+  if (ast.kind === "show") {
+    return {
+      columns: ["TABLE_NAME", "ROWS"],
+      rows: Object.values(state.tables).map(t => ({TABLE_NAME: t.name, ROWS: t.rows.length})),
+      message: Object.keys(state.tables).length + " tables"
+};
+}
+  fail("Cannot execute");
+}
+
+const out = document.getElementById("out");
+const histEl = document.getElementById("hist");
+const tree = document.getElementById("tree");
+const sqlEl = document.getElementById("sql");
+const statusLine = document.getElementById("statusLine");
+
+function renderTree() {
+  const tables = Object.values(state.tables);
+  document.getElementById("objCount").textContent = tables.length + " tables";
+  tree.innerHTML = `<div class="schema"><button type="button">HR</button>` +
+    tables.map(t => `<button class="tbl" data-table="${t.name}"><span>${t.name}</span><small>${t.rows.length}</small></button>
+      <div class="cols">${t.columns.map(c => `<div><span>${c.name}</span><span>${c.type}${c.pk? " · PK": ""}</span></div>`).join("")}</div>`).join("") +
+    `</div>`;
+  tree.querySelectorAll(".tbl").forEach(b => b.onclick = () => {
+    sqlEl.value = "SELECT * FROM " + b.dataset.table + ";";
+    runAll();
+});
+}
+
+function renderResult(res) {
+  if (!res.columns.length) {
+    out.innerHTML = `<div class="msg ok">${escapeHtml(res.message)}</div>`;
+    return;
+}
+  const head = res.columns.map(c => `<th>${escapeHtml(c)}</th>`).join("");
+  const body = res.rows.map(r => `<tr>${res.columns.map(c => `<td>${r[c] == null? "<span style='color:#6d7c99'>NULL</span>": escapeHtml(r[c])}</td>`).join("")}</tr>`).join("");
+  out.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body || ""}</tbody></table>`;
+}
+function escapeHtml(v) {
+  return String(v).replace(/[&<>]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+}
+
+function runAll() {
+  const started = performance.now();
+  const parts = splitStatements(sqlEl.value);
+  if (!parts.length) {statusLine.textContent = "Nothing to run"; return;}
+  try {
+    let last = null;
+    parts.forEach(sql => {last = runStatement(sql); state.history.unshift({sql, ok: true, msg: last.message, at: new Date()});});
+    renderResult(last);
+    const ms = Math.round(performance.now() - started);
+    statusLine.textContent = last.message + " · " + ms + " ms";
+    renderTree();
+    renderHist();
+} catch (e) {
+    out.innerHTML = `<div class="msg err">${escapeHtml(e.message || String(e))}</div>`;
+    statusLine.textContent = "Error";
+    state.history.unshift({sql: parts[0], ok: false, msg: e.message, at: new Date()});
+    renderHist();
+}
+}
+
+function renderHist() {
+  histEl.innerHTML = state.history.slice(0, 30).map(h =>
+    `<div class="msg ${h.ok? "ok": "err"}"><b>${h.ok? "OK": "ERR"}</b> · ${h.at.toLocaleTimeString()}<br>${escapeHtml(h.sql)}<br><span style="color:#8ea0c3">${escapeHtml(h.msg || "")}</span></div>`
+).join("") || `<div class="empty">No history yet.</div>`;
+}
+
+document.getElementById("runBtn").onclick = runAll;
+document.getElementById("clearBtn").onclick = () => {sqlEl.value = ""; sqlEl.focus();};
+document.getElementById("seedBtn").onclick = () => {seed(); renderTree(); out.innerHTML = `<div class="msg ok">Sample HR schema reloaded.</div>`;};
+document.getElementById("exportBtn").onclick = () => {
+  const lines = ["-- ORCL Studio export"];
+  Object.values(state.tables).forEach(t => {
+    lines.push(`CREATE TABLE ${t.name} (${t.columns.map(c => c.name + " " + c.type + (c.pk? " PRIMARY KEY": c.notNull? " NOT NULL": "")).join(", ")});`);
+    t.rows.forEach(r => {
+      const vals = t.columns.map(c => r[c.name] == null? "NULL": typeof r[c.name] === "number"? r[c.name]: `'${String(r[c.name]).replace(/'/g, "''")}'`);
+      lines.push(`INSERT INTO ${t.name} VALUES (${vals.join(", ")});`);
+});
+});
+  const blob = new Blob([lines.join("\n")], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "orcl-export.sql"; a.click();
+};
+document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("on"));
+  tab.classList.add("on");
+  const showHist = tab.dataset.tab === "hist";
+  histEl.hidden =!showHist; out.hidden = showHist;
+});
+sqlEl.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {e.preventDefault(); runAll();}
+});
+setInterval(() => {document.getElementById("clock").textContent = new Date().toLocaleString();}, 1000);
+seed();
+renderTree();
+runAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Console — Compute Instances</title>
+<style>
+:root{--red:#c74634;--ink:#161513;--muted:#6b6560;--line:#e6e2dc;--bg:#f6f5f3;--ok:#1b7a4a;--ok-bg:#e7f6ee;--stop:#8a3a32;--stop-bg:#fdecea;--warn:#9a6700;--warn-bg:#fff6e0;--blue:#1f4e8c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-rows:56px 1fr;grid-template-columns:228px 1fr;grid-template-areas:"top top" "side main"}
+header{grid-area:top;background:#1c1917;color:#fff;display:flex;align-items:center;gap:18px;padding:0 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.mark{width:28px;height:28px;border-radius:7px;background:#c74634;display:grid;place-items:center;font-weight:800;font-size:12px}
+.crumb{color:#c8c2bb;font-size:13px}.crumb b{color:#fff}.hdr-sp,.sp{flex:1}
+.region,.avatar{background:#2c2826;border:1px solid #3d3835;color:#eee;border-radius:8px;padding:6px 10px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+aside{grid-area:side;background:#fff;border-right:1px solid var(--line);padding:14px 10px}
+.nav-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 6px}
+.nav-btn{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.nav-btn.active,.nav-btn:hover{background:#f4efe9}.nav-btn.active{font-weight:600;box-shadow:inset 3px 0 0 var(--red)}
+main{grid-area:main;overflow:auto;padding:22px 28px 48px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,select,input{font:inherit}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13.5px}
+.btn.primary{background:var(--red);border-color:#a33a2b;color:#fff}.btn.danger{color:var(--stop)}.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:10px}.stat{padding:14px 16px}
+.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:700}.panel{overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--muted);padding:10px 14px;background:#faf9f7}
+td{padding:12px 14px;border-top:1px solid #f0ece7}
+tr.click:hover td{background:#fbf8f5;cursor:pointer}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.stop{background:var(--stop-bg);color:var(--stop)}.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.linkish{color:var(--blue);font-weight:600;cursor:pointer}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 12px;font-size:13.5px}.kv span{color:var(--muted)}
+.pad{padding:16px}.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.chart{height:140px;display:flex;align-items:flex-end;gap:6px;margin-top:10px}
+.bar{flex:1;background:#c74634;border-radius:5px 5px 2px 2px;min-height:4px}
+.modal-bg{position:fixed;inset:0;background:rgba(22,21,19,.45);display:none;place-items:center;z-index:20;padding:16px}
+.modal-bg.show{display:grid}.modal{width:min(640px,100%);background:#fff;border-radius:14px}
+.modal-h,.modal-f{padding:16px 18px;display:flex;align-items:center;gap:10px}
+.modal-h{border-bottom:1px solid var(--line)}.modal-f{border-top:1px solid var(--line);justify-content:flex-end}
+.modal-b{padding:16px 18px;display:grid;gap:12px}label{font-size:12.5px;font-weight:600;display:grid;gap:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;bottom:18px;right:18px;background:#1c1917;color:#fff;padding:12px 14px;border-radius:10px;display:none;z-index:30;max-width:360px}
+.toast.show{display:block}.empty{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-areas:"top" "main"}aside{display:none}.cards,.grid2,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">VM</div> Cloud Console</div>
+  <div class="crumb">Compute / <b>Instances</b></div>
+  <div class="hdr-sp"></div>
+  <div class="region" id="regionLabel">us-ashburn-1</div>
+  <div class="avatar">AL</div>
+</header>
+<aside>
+  <div class="nav-label">Compute</div>
+  <button class="nav-btn active" data-view="list">Instances</button>
+  <button class="nav-btn" data-view="shapes">Shapes</button>
+  <button class="nav-btn" data-view="images">Images</button>
+</aside>
+<main id="app"></main>
+<div class="modal-bg" id="modal"></div>
+<div class="toast" id="toast"></div>
+<script>
+const REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1"];
+const SHAPES = [
+  {name: "VM.Standard.E4.Flex", ocpu: 1, mem: 16, price: 0.025},
+  {name: "VM.Standard.E4.Flex", ocpu: 2, mem: 32, price: 0.05},
+  {name: "VM.Standard.A1.Flex", ocpu: 1, mem: 6, price: 0.01},
+  {name: "VM.Standard3.Flex", ocpu: 4, mem: 64, price: 0.12}
+];
+const IMAGES = ["Oracle Linux 8", "Oracle Linux 9", "Ubuntu 22.04", "Windows Server 2022"];
+const ADS = ["AD-1", "AD-2", "AD-3"];
+const state = {view: "list", region: "us-ashburn-1", selected: null, instances: []};
+
+function nid(p) {return p + Math.random().toString(36).slice(2, 10);}
+function now() {return new Date().toISOString();}
+function $(s) {return document.querySelector(s);}
+function esc(s) {return String(s?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function fmt(iso) {return new Date(iso).toLocaleString(undefined, {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});}
+function ip() {return "10.0." + (Math.floor(Math.random() *8) + 1) + "." + (Math.floor(Math.random()* 200) + 10);}
+function pub() {return "129.146." + Math.floor(Math.random() *200) + "." + Math.floor(Math.random()* 200);}
+function pill(text, kind) {return `<span class="pill ${kind}"><span class="dot"></span>${esc(text)}</span>`;}
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2400);
+}
+function shapeLabel(s) {return s.name + " · " + s.ocpu + " OCPU · " + s.mem + " GB";}
+function make(name, image, shape, ad, publicIp) {
+  return {
+    id: nid("ocid1.instance."), name, image, shape, ad, publicIp,
+    privateIp: ip(), region: state.region, state: "Running",
+    created: now(), fault: "FAULT-DOMAIN-" + (1 + Math.floor(Math.random() * 3)),
+    cpu: Array.from({length: 12}, () => 8 + Math.floor(Math.random() * 55))
+};
+}
+state.instances.push(make("web-1", "Oracle Linux 9", SHAPES[0], "AD-1", true));
+
+function render() {
+  $("#regionLabel").textContent = state.region;
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    const v = state.view === "detail"? "list": state.view;
+    btn.classList.toggle("active", btn.dataset.view === v);
+});
+  $("#app").innerHTML = ({list: viewList, detail: viewDetail, shapes: viewShapes, images: viewImages}[state.view])();
+  bind();
+}
+function table(heads, rows, empty) {
+  return `<div class="panel"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td class="empty" colspan="${heads.length}">${empty}</td></tr>`}</tbody></table></div>`;
+}
+function viewList() {
+  const list = state.instances.filter(i => i.region === state.region);
+  const running = list.filter(i => i.state === "Running").length;
+  const stopped = list.filter(i => i.state === "Stopped").length;
+  const cost = list.filter(i => i.state === "Running").reduce((n, i) => n + i.shape.price, 0);
+  const rows = list.map(i => `<tr class="click" data-open="${i.id}"><td class="linkish">${esc(i.name)}</td><td>${pill(i.state, i.state === "Running"? "ok": i.state === "Stopped"? "stop": "warn")}</td><td>${esc(i.shape.name)}</td><td>${esc(i.image)}</td><td class="mono">${i.publicIp? esc(pubOf(i)): "—"}</td><td>${esc(i.ad)}</td></tr>`).join("");
+  return `<div class="row"><div><h1>Instances</h1><p class="sub">Simulated compute in ${state.region}. Start, stop, and terminate stay in this tab.</p></div><div class="sp"></div><select id="region">${REGIONS.map(r => `<option ${r === state.region? "selected": ""}>${r}</option>`).join("")}</select><button class="btn primary" id="create">Create instance</button></div>
+    <div class="cards"><div class="stat"><div class="k">Instances</div><div class="v">${list.length}</div></div><div class="stat"><div class="k">Running</div><div class="v">${running}</div></div><div class="stat"><div class="k">Stopped</div><div class="v">${stopped}</div></div><div class="stat"><div class="k">Est. / hour</div><div class="v">$${cost.toFixed(2)}</div></div></div>
+    ${table(["Name", "State", "Shape", "Image", "Public IP", "AD"], rows, "No instances in this region.")}`;
+}
+function pubOf(i) {return i._pub || (i._pub = pub());}
+function viewDetail() {
+  const i = state.instances.find(x => x.id === state.selected);
+  if (!i) {state.view = "list"; return viewList();}
+  const bars = i.cpu.map(n => `<div class="bar" style="height:${n}%"></div>`).join("");
+  const running = i.state === "Running";
+  return `<div class="row"><button class="btn" id="back">← Instances</button><div><h1 style="margin:0">${esc(i.name)}</h1><p class="sub" style="margin:2px 0 0">${esc(i.ad)} · ${esc(i.fault)}</p></div><div class="sp"></div>
+    <button class="btn" id="power" ${i.state === "Provisioning" || i.state === "Stopping"? "disabled": ""}>${running? "Stop": "Start"}</button>
+    <button class="btn danger" id="term">Terminate</button></div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="panel pad"><div class="kv"><span>State</span><div>${pill(i.state, running? "ok": i.state === "Stopped"? "stop": "warn")}</div><span>OCID</span><div class="mono">${i.id}</div><span>Shape</span><div>${esc(shapeLabel(i.shape))}</div><span>Image</span><div>${esc(i.image)}</div><span>Private IP</span><div class="mono">${esc(i.privateIp)}</div><span>Public IP</span><div class="mono">${i.publicIp? esc(pubOf(i)): "None"}</div><span>Created</span><div>${fmt(i.created)}</div></div></div>
+      <div class="panel pad"><h3 style="margin:0">CPU</h3><p class="sub">Fake samples. Not a live metric.</p><div class="chart">${bars}</div></div>
+    </div>`;
+}
+function viewShapes() {
+  const rows = SHAPES.map(s => `<tr><td class="mono">${esc(s.name)}</td><td>${s.ocpu}</td><td>${s.mem} GB</td><td>$${s.price.toFixed(3)} / hr</td></tr>`).join("");
+  return `<h1>Shapes</h1><p class="sub">Catalog used by the create form. Prices are invented for the demo.</p>${table(["Shape", "OCPU", "Memory", "Rate"], rows, "")}`;
+}
+function viewImages() {
+  const rows = IMAGES.map(img => `<tr><td>${esc(img)}</td><td>Platform</td><td>${esc(state.region)}</td></tr>`).join("");
+  return `<h1>Images</h1><p class="sub">Boot images available in this demo.</p>${table(["Image", "Type", "Region"], rows, "")}`;
+}
+function shell(title, fields, go) {
+  return `<div class="modal-h"><h2 style="margin:0">${title}</h2><div class="sp"></div><button class="btn" id="x">Close</button></div><div class="modal-b">${fields}</div><div class="modal-f"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="go">${go}</button></div>`;
+}
+function openModal(html, onGo) {
+  const m = $("#modal");
+  m.classList.add("show");
+  m.innerHTML = `<div class="modal">${html}</div>`;
+  $("#x").onclick = close;
+  $("#cancel").onclick = close;
+  $("#go").onclick = onGo;
+}
+function close() {$("#modal").classList.remove("show"); $("#modal").innerHTML = "";}
+function setState(inst, next, ms, done) {
+  inst.state = next;
+  render();
+  setTimeout(() => {inst.state = done; toast(inst.name + " is " + done.toLowerCase()); render();}, ms);
+}
+function bind() {
+  const region = $("#region");
+  if (region) region.onchange = e => {state.region = e.target.value; render();};
+  const create = $("#create");
+  if (create) create.onclick = () => openModal(shell("Create instance",
+    `<label>Name<input id="n" value="app-1"></label>
+     <div class="two"><label>Image<select id="image">${IMAGES.map(x => `<option>${esc(x)}</option>`).join("")}</select></label>
+     <label>Availability domain<select id="ad">${ADS.map(x => `<option>${x}</option>`).join("")}</select></label></div>
+     <label>Shape<select id="shape">${SHAPES.map((s, n) => `<option value="${n}">${esc(shapeLabel(s))}</option>`).join("")}</select></label>
+     <label>Public IP<select id="pip"><option value="yes">Assign</option><option value="no">None</option></select></label>`,
+    "Create"), () => {
+      const name = $("#n").value.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9-]{1,30}$/.test(name)) return toast("Use a short instance name.");
+      const inst = make(name, $("#image").value, SHAPES[+$("#shape").value], $("#ad").value, $("#pip").value === "yes");
+      inst.state = "Provisioning";
+      state.instances.unshift(inst);
+      close();
+      toast("Provisioning " + name);
+      render();
+      setTimeout(() => {inst.state = "Running"; toast(name + " is running"); render();}, 900);
+});
+  document.querySelectorAll("[data-open]").forEach(el => {el.onclick = () => {state.selected = el.dataset.open; state.view = "detail"; render();};});
+  const back = $("#back");
+  if (back) back.onclick = () => {state.view = "list"; render();};
+  const inst = state.instances.find(x => x.id === state.selected);
+  if (inst && $("#power")) $("#power").onclick = () => {
+    if (inst.state === "Running") setState(inst, "Stopping", 700, "Stopped");
+    else if (inst.state === "Stopped") setState(inst, "Starting", 700, "Running");
+};
+  if (inst && $("#term")) $("#term").onclick = () => {
+    if (!confirm("Terminate " + inst.name + "?")) return;
+    state.instances = state.instances.filter(x => x.id!== inst.id);
+    state.view = "list";
+    toast("Instance terminated");
+    render();
+};
+}
+document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => {state.view = btn.dataset.view; render();}));
+render();
+</script>
+</body>
+</html>

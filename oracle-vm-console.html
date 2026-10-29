@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Console — Virtual Machines</title>
+<style>
+:root{--red:#c74634;--ink:#161513;--muted:#6b6560;--line:#e6e2dc;--bg:#f6f5f3;--ok:#1b7a4a;--ok-bg:#e7f6ee;--stop:#8a3a32;--stop-bg:#fdecea;--warn:#9a6700;--warn-bg:#fff6e0;--blue:#1f4e8c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-rows:56px 1fr;grid-template-columns:228px 1fr;grid-template-areas:"top top" "side main"}
+header{grid-area:top;background:#1c1917;color:#fff;display:flex;align-items:center;gap:18px;padding:0 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.mark{width:28px;height:28px;border-radius:7px;background:#c74634;display:grid;place-items:center;font-weight:800;font-size:12px}
+.crumb{color:#c8c2bb;font-size:13px}.crumb b{color:#fff}.hdr-sp,.sp{flex:1}
+.region,.avatar{background:#2c2826;border:1px solid #3d3835;color:#eee;border-radius:8px;padding:6px 10px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+aside{grid-area:side;background:#fff;border-right:1px solid var(--line);padding:14px 10px}
+.nav-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 6px}
+.nav-btn{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.nav-btn.active,.nav-btn:hover{background:#f4efe9}.nav-btn.active{font-weight:600;box-shadow:inset 3px 0 0 var(--red)}
+main{grid-area:main;overflow:auto;padding:22px 28px 48px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,select,input{font:inherit}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13.5px}
+.btn.primary{background:var(--red);border-color:#a33a2b;color:#fff}.btn.danger{color:var(--stop)}
+input,select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:10px}.stat{padding:14px 16px}
+.k{font-size:12px;color:var(--muted)}.v{font-size:24px;font-weight:700}.panel{overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--muted);padding:10px 14px;background:#faf9f7}
+td{padding:12px 14px;border-top:1px solid #f0ece7}
+tr.click:hover td{background:#fbf8f5;cursor:pointer}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.stop{background:var(--stop-bg);color:var(--stop)}.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.linkish{color:var(--blue);font-weight:600;cursor:pointer}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 16px}
+.tab{border:0;background:transparent;padding:10px 12px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--ink);border-bottom:2px solid var(--red)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:8px 12px;font-size:13.5px}.kv span{color:var(--muted)}
+.pad{padding:16px}.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.modal-bg{position:fixed;inset:0;background:rgba(22,21,19,.45);display:none;place-items:center;z-index:20;padding:16px}
+.modal-bg.show{display:grid}.modal{width:min(640px,100%);background:#fff;border-radius:14px}
+.modal-h,.modal-f{padding:16px 18px;display:flex;align-items:center;gap:10px}
+.modal-h{border-bottom:1px solid var(--line)}.modal-f{border-top:1px solid var(--line);justify-content:flex-end}
+.modal-b{padding:16px 18px;display:grid;gap:12px}label{font-size:12.5px;font-weight:600;display:grid;gap:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;bottom:18px;right:18px;background:#1c1917;color:#fff;padding:12px 14px;border-radius:10px;display:none;z-index:30}
+.toast.show{display:block}.empty{padding:28px;text-align:center;color:var(--muted)}
+.bar{height:8px;background:#f0ece7;border-radius:99px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#c74634}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-areas:"top" "main"}aside{display:none}.cards,.grid2,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">VM</div> Cloud Console</div>
+  <div class="crumb">Compute / <b>Instances</b></div>
+  <div class="hdr-sp"></div>
+  <div class="region" id="regionLabel">us-ashburn-1</div>
+  <div class="avatar">AL</div>
+</header>
+<aside>
+  <div class="nav-label">Compute</div>
+  <button class="nav-btn active" data-view="list">Instances</button>
+  <button class="nav-btn" data-view="images">Images</button>
+  <button class="nav-btn" data-view="shapes">Shapes</button>
+</aside>
+<main id="app"></main>
+<div class="modal-bg" id="modal"></div>
+<div class="toast" id="toast"></div>
+<script>
+const REGIONS = ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1"];
+const IMAGES = [
+  {id: "img-ol9", name: "Oracle Linux 9", os: "Linux"},
+  {id: "img-ol8", name: "Oracle Linux 8", os: "Linux"},
+  {id: "img-ubuntu", name: "Ubuntu 22.04", os: "Linux"}
+];
+const SHAPES = [
+  {name: "VM.Standard.E4.Flex", ocpu: 1, mem: 16, price: 0.025},
+  {name: "VM.Standard.E4.Flex", ocpu: 2, mem: 32, price: 0.05},
+  {name: "VM.Standard3.Flex", ocpu: 1, mem: 8, price: 0.04}
+];
+const state = {view: "list", region: "us-ashburn-1", selected: null, tab: "overview", vms: []};
+
+function nid(p) {return p + Math.random().toString(36).slice(2, 10);}
+function now() {return new Date().toISOString();}
+function $(s) {return document.querySelector(s);}
+function esc(s) {return String(s?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function fmt(iso) {return new Date(iso).toLocaleString(undefined, {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});}
+function pill(status) {
+  const cls = /running/i.test(status)? "ok": /stopped|terminated/i.test(status)? "stop": "warn";
+  return `<span class="pill ${cls}"><span class="dot"></span>${esc(status)}</span>`;
+}
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function pubIp() {return "129.146." + (10 + Math.floor(Math.random() *80)) + "." + (10 + Math.floor(Math.random()* 200));}
+function privIp() {return "10.0.0." + (10 + Math.floor(Math.random() * 200));}
+
+function makeVm(name, image, shape, ad) {
+  return {
+    id: nid("ocid1.instance."),
+    name, image, shape: shape.name, ocpu: shape.ocpu, mem: shape.mem, price: shape.price,
+    ad, status: "Provisioning", region: state.region, compartment: "prod-apps",
+    publicIp: pubIp(), privateIp: privIp(), created: now(),
+    cpu: 8 + Math.floor(Math.random() * 30),
+    boot: "50 GB"
+};
+}
+function seed() {
+  const a = makeVm("web-1", "Oracle Linux 9", SHAPES[0], "AD-1");
+  const b = makeVm("batch-1", "Ubuntu 22.04", SHAPES[2], "AD-2");
+  a.status = "Running";
+  b.status = "Stopped";
+  state.vms.push(a, b);
+}
+seed();
+
+function render() {
+  $("#regionLabel").textContent = state.region;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === (state.view === "detail"? "list": state.view)));
+  const views = {list: viewList, detail: viewDetail, images: viewImages, shapes: viewShapes};
+  $("#app").innerHTML = views[state.view]();
+  bind();
+}
+function table(heads, rows, empty) {
+  return `<div class="panel"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td class="empty" colspan="${heads.length}">${empty}</td></tr>`}</tbody></table></div>`;
+}
+function viewList() {
+  const list = state.vms.filter(v => v.region === state.region && v.status!== "Terminated");
+  const running = list.filter(v => v.status === "Running").length;
+  const ocpu = list.reduce((a, v) => a + v.ocpu, 0);
+  const cost = list.filter(v => v.status === "Running").reduce((a, v) => a + v.price, 0);
+  const rows = list.map(v => `<tr class="click" data-open="${v.id}"><td class="linkish">${esc(v.name)}<div class="mono">${v.publicIp}</div></td><td>${pill(v.status)}</td><td>${esc(v.shape)}<div class="k">${v.ocpu} OCPU · ${v.mem} GB</div></td><td>${esc(v.image)}</td><td>${v.ad}</td><td>${v.compartment}</td></tr>`).join("");
+  return `<div class="row"><div><h1>Instances</h1><p class="sub">Simulated virtual machines in ${state.region}. Start and stop stay in this tab.</p></div><div class="sp"></div><select id="region">${REGIONS.map(r => `<option ${r === state.region? "selected": ""}>${r}</option>`).join("")}</select><button class="btn primary" id="create">Create instance</button></div>
+    <div class="cards"><div class="stat"><div class="k">Instances</div><div class="v">${list.length}</div></div><div class="stat"><div class="k">Running</div><div class="v">${running}</div></div><div class="stat"><div class="k">OCPUs</div><div class="v">${ocpu}</div></div><div class="stat"><div class="k">Est. / hour</div><div class="v">$${cost.toFixed(3)}</div></div></div>
+    ${table(["Name", "State", "Shape", "Image", "Availability domain", "Compartment"], rows, "No instances in this region.")}`;
+}
+function viewDetail() {
+  const v = state.vms.find(x => x.id === state.selected);
+  if (!v) {state.view = "list"; return viewList();}
+  const tabs = ["overview", "networking", "metrics"].map(t => `<button class="tab ${state.tab === t? "on": ""}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join("");
+  const power = v.status === "Running"? `<button class="btn" id="stop">Stop</button>`: `<button class="btn" id="start">Start</button>`;
+  return `<div class="row"><button class="btn" id="back">← Instances</button><div><h1 style="margin:0">${esc(v.name)}</h1><p class="sub" style="margin:2px 0 0">${esc(v.shape)}</p></div><div class="sp"></div>${pill(v.status)}${power}<button class="btn danger" id="del">Terminate</button></div><div class="tabs">${tabs}</div>${detail(v)}`;
+}
+function detail(v) {
+  if (state.tab === "overview") {
+    return `<div class="panel pad"><div class="kv"><span>OCID</span><div class="mono">${v.id}</div><span>Image</span><div>${esc(v.image)}</div><span>Shape</span><div>${esc(v.shape)}</div><span>OCPU / memory</span><div>${v.ocpu} / ${v.mem} GB</div><span>Boot volume</span><div>${v.boot}</div><span>Fault domain</span><div>${v.ad}</div><span>Created</span><div>${fmt(v.created)}</div><span>Hourly estimate</span><div>$${v.price.toFixed(3)} while running</div></div></div>`;
+}
+  if (state.tab === "networking") {
+    return `<div class="panel pad"><div class="kv"><span>Public IP</span><div class="mono">${v.publicIp}</div><span>Private IP</span><div class="mono">${v.privateIp}</div><span>Subnet</span><div>public-subnet</div><span>VNIC</span><div class="mono">${nid("ocid1.vnic.")}</div></div><p class="sub">These addresses are fake. Nothing is reachable on the network.</p></div>`;
+}
+  const cpu = v.status === "Running"? v.cpu: 0;
+  const mem = v.status === "Running"? Math.min(92, 20 + v.cpu): 0;
+  return `<div class="grid2"><div class="panel pad"><div class="k">CPU</div><div class="v">${cpu}%</div><div class="bar"><i style="width:${cpu}%"></i></div></div><div class="panel pad"><div class="k">Memory</div><div class="v">${mem}%</div><div class="bar"><i style="width:${mem}%"></i></div></div></div>`;
+}
+function viewImages() {
+  const rows = IMAGES.map(i => `<tr><td>${esc(i.name)}</td><td>${i.os}</td><td class="mono">${i.id}</td><td><span class="pill ok"><span class="dot"></span>Available</span></td></tr>`).join("");
+  return `<h1>Images</h1><p class="sub">Platform images you can pick when creating an instance.</p>${table(["Name", "OS", "Image ID", "State"], rows, "None")}`;
+}
+function viewShapes() {
+  const rows = SHAPES.map(s => `<tr><td class="mono">${esc(s.name)}</td><td>${s.ocpu}</td><td>${s.mem} GB</td><td>$${s.price.toFixed(3)}</td></tr>`).join("");
+  return `<h1>Shapes</h1><p class="sub">Sample flexible shapes. Prices are made up for this demo.</p>${table(["Shape", "OCPU", "Memory", "Est. / hour"], rows, "None")}`;
+}
+
+function openModal(html, onGo) {
+  const m = $("#modal");
+  m.classList.add("show");
+  m.innerHTML = `<div class="modal">${html}</div>`;
+  $("#x").onclick = close;
+  $("#cancel").onclick = close;
+  $("#go").onclick = onGo;
+}
+function close() {
+  $("#modal").classList.remove("show");
+  $("#modal").innerHTML = "";
+}
+function bind() {
+  const region = $("#region");
+  if (region) region.onchange = e => {state.region = e.target.value; render();};
+  const create = $("#create");
+  if (create) create.onclick = () => {
+    openModal(`<div class="modal-h"><h2 style="margin:0">Create instance</h2><div class="sp"></div><button class="btn" id="x">Close</button></div>
+      <div class="modal-b"><label>Name<input id="n" value="app-1"></label>
+      <label>Image<select id="img">${IMAGES.map(i => `<option>${esc(i.name)}</option>`).join("")}</select></label>
+      <div class="two"><label>Shape<select id="shape">${SHAPES.map((s, i) => `<option value="${i}">${s.name} · ${s.ocpu} OCPU</option>`).join("")}</select></label>
+      <label>Availability domain<select id="ad"><option>AD-1</option><option>AD-2</option><option>AD-3</option></select></label></div>
+      <p class="sub">No SSH key is stored. This does not open a real machine.</p></div>
+      <div class="modal-f"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="go">Create</button></div>`, () => {
+      const name = $("#n").value.trim().toLowerCase();
+      if (!/^[a-z][a-z0-9-]{1,28}$/.test(name)) return toast("Use a short lowercase name.");
+      const vm = makeVm(name, $("#img").value, SHAPES[+$("#shape").value], $("#ad").value);
+      state.vms.unshift(vm);
+      close();
+      render();
+      setTimeout(() => {vm.status = "Running"; toast(name + " is Running"); render();}, 900);
+});
+};
+  document.querySelectorAll("[data-open]").forEach(el => {
+    el.onclick = () => {state.selected = el.dataset.open; state.view = "detail"; state.tab = "overview"; render();};
+});
+  document.querySelectorAll("[data-tab]").forEach(el => {el.onclick = () => {state.tab = el.dataset.tab; render();};});
+  const back = $("#back");
+  if (back) back.onclick = () => {state.view = "list"; render();};
+  const vm = state.vms.find(x => x.id === state.selected);
+  if (vm && $("#start")) $("#start").onclick = () => {vm.status = "Starting"; render(); setTimeout(() => {vm.status = "Running"; toast("Running"); render();}, 700);};
+  if (vm && $("#stop")) $("#stop").onclick = () => {vm.status = "Stopping"; render(); setTimeout(() => {vm.status = "Stopped"; toast("Stopped"); render();}, 700);};
+  if (vm && $("#del")) $("#del").onclick = () => {
+    if (!confirm("Terminate " + vm.name + "?")) return;
+    vm.status = "Terminated";
+    state.view = "list";
+    toast("Terminated");
+    render();
+};
+}
+document.querySelectorAll(".nav-btn").forEach(b => b.addEventListener("click", () => {state.view = b.dataset.view; render();}));
+render();
+</script>
+</body>
+</html>
